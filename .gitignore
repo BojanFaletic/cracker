@@ -1,0 +1,5 @@
+.vscode
+*.ipynb
+__pycache__
+
+experiments
