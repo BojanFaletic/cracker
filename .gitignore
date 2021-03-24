@@ -1,5 +1,10 @@
 .vscode
-*.ipynb
 __pycache__
 
 experiments
+
+tree
+data
+checkpoint
+
+program.log

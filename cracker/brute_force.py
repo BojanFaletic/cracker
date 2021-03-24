@@ -1,9 +1,7 @@
 from serial import Serial
-from send import try_combination, is_unlocked
+from cracker import PORT, BAUD
+from cracker.send import try_combination, is_unlocked
 import logging
-
-PORT = 'COM3'
-BAUD = 115200
 
 
 def brute_force(key: list) -> None:
@@ -20,4 +18,6 @@ def brute_force(key: list) -> None:
                 print(f'UNLOCKED: with key {key}')
                 logging.info(f'UNLOCKED: key: {key}')
                 print('Terminating')
+                serial.close()
                 exit(0)
+    serial.close()

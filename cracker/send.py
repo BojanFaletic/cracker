@@ -2,10 +2,7 @@ from time import sleep
 from saleae import Saleae
 from serial import Serial
 import logging
-
-
-PORT = 'COM3'
-BAUD = 115200
+from cracker import PORT, BAUD
 
 
 def write(ser, hex_number):

@@ -1,5 +1,5 @@
-from check_hist import check_byte
-from brute_force import brute_force
+from cracker.check_hist import check_byte
+from cracker.brute_force import brute_force
 import logging
 import pickle
 

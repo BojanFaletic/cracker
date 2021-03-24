@@ -1,5 +1,5 @@
-from decode_data import decode_uart
-from send import check_combination
+from cracker.decode_data import decode_uart
+from cracker.send import check_combination
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
