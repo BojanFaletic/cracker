@@ -1,7 +1,0 @@
-pyserial
-saleae
-numpy
-matplotlib
-logging
-heapq
-pickle

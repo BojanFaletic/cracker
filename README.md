@@ -1,16 +1,16 @@
 # Cracker
 
-Guess ID for microprocessor. 
+Guess ID for microprocessor.
 
 # How to run
 
 1) Install Python+3.5, pip
 
 ``` shell
- $ pip install -r requrements.txt
+ $ pip install -r requirements.txt
 ```
 
-2) Connect logic analizer: TX = channel 0, RX = channel 1
+2) Connect logic analyzer: TX = channel 0, RX = channel 1
 3) Set baud rate to 115200
 4) For now serial port is 'COM3'
 
@@ -20,8 +20,8 @@ $ python main.py
 
 # Output
 
-* Log of program is stored in program.log. 
+* Log of program is stored in program.log.
 * Folder tree contains explored graph in .pkl file, this is used
-for restoring state in case of early termination. 
-* Folder checkpoint contains .npy file of key this is for debugging purposes. 
+for restoring state in case of early termination.
+* Folder checkpoint contains .npy file of key this is for debugging purposes.
 * Folder plots contains images of average time, per digit, used for debugging.
