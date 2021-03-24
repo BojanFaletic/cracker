@@ -59,3 +59,4 @@ def check_combination(key: list):
     sleep(2)
     logic.export_data2('data/logic_data.csv')
     sleep(3)
+    serial.close()

@@ -1,8 +1,5 @@
 import logging
-
-TX = 0x1
-RX = 0x2
-IDLE = 0x0
+from cracker import TX, RX, IDLE
 
 
 def to_signal(value_: int) -> int:
