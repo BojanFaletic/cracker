@@ -5,6 +5,7 @@ logging.basicConfig(filename='program.log', encoding='utf-8',
 
 from cracker.search import depth_search, Graph
 
+
 def create_directories():
     required_dir = ['data', 'tree', 'checkpoint', 'plots']
     for r_dir in required_dir:
@@ -14,6 +15,7 @@ def create_directories():
 
 def init_log():
     logging.info('******* START logging ******* ')
+
 
 def run():
     graph = Graph(max_depth=5, filename='tree/tree')
@@ -30,7 +32,7 @@ def run():
 def main():
     init_log()
     create_directories()
-    #run()
+    run()
 
 
 if __name__ == "__main__":
