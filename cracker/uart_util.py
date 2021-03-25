@@ -40,13 +40,13 @@ def is_unlocked(ser: Serial) -> bool:
     if len(status) == 0:
         logging.warn('UART is empty, error?')
         return False
-    if read == INVALID_ID:
+    if status == INVALID_ID:
         return False
-    if read == VALID_ID:
+    if status == VALID_ID:
         logging.info("UNLOCKED!")
         return True
     else:
-        logging.warn(f"Received unknown code: {read}")
+        logging.warn(f"Received unknown code: {status}")
         return False
 
 
