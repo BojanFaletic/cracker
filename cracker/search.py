@@ -1,6 +1,6 @@
 from cracker.digit import check_digit
 from cracker.uart_util import brute_force
-from graph import Graph
+from cracker.graph import Graph
 import logging
 
 
