@@ -9,7 +9,7 @@ TX = 1
 RX = 2
 
 # sending
-PACKET_SIZE = 64
+PACKET_SIZE = 4
 DIGIT_IDLE_TIME = 0.2
 
 # Status bits
