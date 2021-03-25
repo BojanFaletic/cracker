@@ -4,7 +4,7 @@ from cracker.static import Static
 
 
 def is_data_idx_valid(st: Static) -> bool:
-    if st.position != 256:
+    if st.position != 255:
         print(f'Index of csv file is invalid: {st.position}')
         return False
     return True

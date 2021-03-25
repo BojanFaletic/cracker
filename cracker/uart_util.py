@@ -97,7 +97,7 @@ def save_data(log: Saleae) -> None:
 def check_key(ser: Serial, try_key: list) -> None:
     for idx in range(PACKET_SIZE):
         check_combination(ser, try_key)
-    sleep(DIGIT_IDLE_TIME+0.1)
+    sleep(DIGIT_IDLE_TIME)
 
 
 def brute_force(key: list) -> None:
