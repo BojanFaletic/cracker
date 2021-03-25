@@ -33,8 +33,8 @@ def read_request(ser: Serial):
 
 
 def is_unlocked(ser: Serial) -> bool:
-    INVALID_ID = [0x80, 0x04]
-    VALID_ID = [0x80, 0x0c]
+    INVALID_ID = b'\x80\x04'
+    VALID_ID = b'\x80\x0c'
 
     status = read_request(ser)
     if len(status) == 0:
