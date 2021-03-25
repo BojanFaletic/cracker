@@ -6,7 +6,7 @@ import os
 if os.getenv('TEST'):
     from test_overide_methods import check_byte, brute_force
 else:
-    from cracker.check_hist import check_digit as check_byte
+    from cracker.digit import check_digit as check_byte
     from cracker.brute_force import brute_force
 
 
