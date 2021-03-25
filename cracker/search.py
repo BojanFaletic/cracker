@@ -6,7 +6,7 @@ import os
 if os.getenv('TEST'):
     from test_overide_methods import check_byte, brute_force
 else:
-    from cracker.check_hist import check_byte
+    from cracker.check_hist import check_digit as check_byte
     from cracker.brute_force import brute_force
 
 
@@ -87,4 +87,3 @@ def depth_search(gr: Graph, depth=0, key=[0]*7):
 
         gr.add_explored_path(depth, path)
         depth_search(gr, depth+1)
-
