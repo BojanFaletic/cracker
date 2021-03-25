@@ -1,7 +1,13 @@
-from cracker.check_hist import check_byte
-from cracker.brute_force import brute_force
 import logging
 import pickle
+import os
+
+# if program is in testing mode then overwrite methods
+if os.getenv('TEST'):
+    from test_overide_methods import check_byte, brute_force
+else:
+    from cracker.check_hist import check_byte
+    from cracker.brute_force import brute_force
 
 
 class Graph:
@@ -26,6 +32,7 @@ class Graph:
         for el in self.graph[depth]:
             if not (el in self.visited_graph[depth]):
                 return el
+        return None
 
     def save(self):
         with open(self.graph_filename, 'wb') as f:
@@ -59,15 +66,25 @@ def depth_search(gr: Graph, depth=0, key=[0]*7):
         logging.info(f'Brute forcing unsuccessfull: {key}')
         return
 
-    # find most probable codes and add them to number
-    possible_paths = check_byte(key, depth)
-    gr.add_possible_paths(depth, possible_paths)
+    # if no path exist start from beginning
+    if depth == 0:
+        # find most probable codes and add them to number
+        possible_paths = check_byte(key, depth)
+        gr.add_possible_paths(depth, possible_paths)
 
     # depth first search on unexplored paths
     for path in gr.unexplored_paths(depth):
+        if path is None:
+            return
+
+        # find possible path from this position
+        possible_paths = check_byte(key, depth)
+        gr.add_possible_paths(depth, possible_paths)
+
         key[depth] = path
         print(f'Exploring path: {key}')
         logging.info(f'Exploring path: {key}')
 
         gr.add_explored_path(depth, path)
         depth_search(gr, depth+1)
+

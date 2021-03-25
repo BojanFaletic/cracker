@@ -42,21 +42,22 @@ def is_unlocked(ser: Serial) -> bool:
 
 def check_combination(key: list):
     serial = Serial(port=PORT, baudrate=BAUD, timeout=0.1)
+    NUM_SAMPLES = 64
 
     # connect to logic analyzer
     logic = Saleae(quiet=True)
     logic.set_capture_seconds(170)
 
     logic.capture_start()
-    for _ in range(1024):
+    for _ in range(NUM_SAMPLES):
         try_combination(serial, key)
         serial.flush()
         if is_unlocked(serial):
             logging.info(f'Found Key: {key}')
             break
-    sleep(2)
+    sleep(0.5)
     logic.capture_stop()
-    sleep(2)
+    sleep(0.5)
     logic.export_data2('data/logic_data.csv')
     sleep(3)
     serial.close()

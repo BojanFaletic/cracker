@@ -7,7 +7,7 @@ import heapq
 
 
 def check_byte(key: list, digit: int) -> list:
-    full_combinations = []
+    full_combinations = np.zeros((256, 4))
 
     # key to string
     key_id = ''
@@ -30,25 +30,24 @@ def check_byte(key: list, digit: int) -> list:
 
         data_summary = [min_value, max_value, average_value, std_div]
 
-        full_combinations.append(data_summary)
+        full_combinations[combination] = data_summary
 
-    np_full_combinations = np.array(full_combinations)
-    logging.info(f"Full swap done {key}")
+    logging.info(f"Full swap done: {key}, depth: {digit}")
 
     # saves
     np.save(f'checkpoint/{key_id}.npy', full_combinations)
 
     # plots
     t = np.arange(256)
-    plt.plot(t, np_full_combinations.T[0], t, np_full_combinations.T[1],
-             t, np_full_combinations[2])
+    plt.plot(t, full_combinations.T[0], t, full_combinations.T[1],
+             t, full_combinations.T[2])
     plt.savefig(f'plots/{key_id}_min_max_avg.png')
 
-    plt.plot(t, np_full_combinations.T[2], t, np_full_combinations.T[3])
+    plt.plot(t, full_combinations.T[2], t, full_combinations.T[3])
     plt.savefig(f'plots/{key_id}_avg_std.png')
 
     # select most probable combinations
-    longest_digits = np_full_combinations.T[1]
+    longest_digits = full_combinations.T[1]
 
     # find longest combinations
     most_probable_keys = heapq.nlargest(3, range(len(longest_digits)),
@@ -56,5 +55,6 @@ def check_byte(key: list, digit: int) -> list:
 
     logging.info(f'Done most likely values: {most_probable_keys}')
     print(f'Done most likely values: {most_probable_keys}')
+    print(f"Done cracking byte: {round(100*digit/5)}% best case")
 
     return most_probable_keys
