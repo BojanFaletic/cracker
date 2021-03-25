@@ -12,7 +12,7 @@ def wait_until_transmit(st: Static, value_: int) -> None:
 
 
 def save_delta(st: Static, time_: float) -> None:
-    delta = time_ - st.time_prev
+    delta = time_ - st.prev_time
     st.deltas[st.position].append(delta)
 
 
@@ -24,7 +24,7 @@ def wait_until_receive(st: Static, value_: int, time_: float) -> None:
 
 def select_digit(st: Static, time_: float) -> None:
     TIME_THR = 0.2
-    delta = time_ - st.time_prev
+    delta = time_ - st.prev_time
     if delta >= TIME_THR:
         st.position += 1
     if st.position > 255:
