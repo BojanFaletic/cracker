@@ -22,11 +22,12 @@ def depth_search(gr: Graph, depth=0, key=[0]*7):
         possible_paths = check_digit(key, depth)
         gr.add_possible_paths(depth, possible_paths)
 
+    # if no valid path then return
+    if gr.unexplored_paths(depth) is None:
+        return
+
     # depth first search on unexplored paths
     for path in gr.unexplored_paths(depth):
-        if path is None:
-            return
-
         # find possible path from this position
         possible_paths = check_digit(key, depth)
         gr.add_possible_paths(depth, possible_paths)

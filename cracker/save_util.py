@@ -3,21 +3,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def save_plot_data(data_: np.array, label_: str) -> None:
+def save_average_plot(time_: np.array, min_: np.array, max_: np.array,
+                      average_: np.array, label_: str) -> None:
     plot_name_avg = PLOT_DIR + label_ + '_min_max_avg.png'
-    plot_name_std = PLOT_DIR + label_ + '_avg_std.png'
+    plt.plot(time_, min_, time_, max_, time_, average_)
+    plt.savefig(plot_name_avg)
 
+
+def save_std_pot(time_: np.array, std_: np.array, label_: str) -> None:
+    plot_name_std = PLOT_DIR + label_ + '_avg_std.png'
+    plt.plot(time_, std_)
+    plt.savefig(plot_name_std)
+
+
+def save_plot_data(data_: np.array, label_: str) -> None:
     min_v = data_.T[0]
     max_v = data_.T[1]
     average_v = data_.T[2]
     std_v = data_.T[3]
     t = np.arange(256)
 
-    plt.plot(t, min_v, t, max_v, t, average_v)
-    plt.savefig(plot_name_avg)
-
-    plt.plot(t, average_v, t, std_v)
-    plt.savefig(plot_name_std)
+    save_average_plot(t, min_v, max_v, average_v, label_)
+    save_std_pot(t, std_v, label_)
 
 
 def save_raw_data(data_: np.array, label_: str) -> None:
