@@ -12,8 +12,9 @@ def wait_until_transmit(st: Static, value_: int) -> None:
 
 
 def save_delta(st: Static, time_: float) -> None:
-    delta = time_ - st.prev_time
-    st.deltas[st.position].append(delta)
+    if st.position >= 0:
+        delta = time_ - st.prev_time
+        st.deltas[st.position].append(delta)
 
 
 def wait_until_receive(st: Static, value_: int, time_: float) -> None:
@@ -53,21 +54,9 @@ def decode_line(line: str) -> (int, float):
     return value_, time_
 
 
-def init_state_machine(st: Static, value_: int) -> None:
-    if value_ == IDLE:
-        st.state = TX
-
-
 def read_csv(st: Static, f_name=WAVEFORM_FILE) -> None:
     with open(f_name, 'r') as f:
         check_csv_header(f.readline())
-
-        is_sm_init = False
         while data := f.readline():
             value, time = decode_line(data)
-
-            if not is_sm_init:
-                init_state_machine(st, value)
-                is_sm_init = True
-
             decode_UART(st, value, time)
