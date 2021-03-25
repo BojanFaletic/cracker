@@ -1,4 +1,4 @@
-from cracker.constants import IDLE, TX, RX, WAVEFORM_FILE
+from cracker.constants import IDLE, TX, RX, WAVEFORM_FILE, DIGIT_IDLE_TIME
 from cracker.static import Static
 
 
@@ -23,9 +23,9 @@ def wait_until_receive(st: Static, value_: int, time_: float) -> None:
 
 
 def select_digit(st: Static, time_: float) -> None:
-    TIME_THR = 0.2
+    time_thr = DIGIT_IDLE_TIME * (1-0.05)
     delta = time_ - st.prev_time
-    if delta >= TIME_THR:
+    if delta >= time_thr:
         st.position += 1
     if st.position > 255:
         print('Byte position is larger than 255')
@@ -53,9 +53,21 @@ def decode_line(line: str) -> (int, float):
     return value_, time_
 
 
+def init_state_machine(st: Static, value_: int) -> None:
+    if value_ == IDLE:
+        st.state = TX
+
+
 def read_csv(st: Static, f_name=WAVEFORM_FILE) -> None:
     with open(f_name, 'r') as f:
         check_csv_header(f.readline())
+
+        is_sm_init = False
         while data := f.readline():
             value, time = decode_line(data)
+
+            if not is_sm_init:
+                init_state_machine(st, value)
+                is_sm_init = True
+
             decode_UART(st, value, time)

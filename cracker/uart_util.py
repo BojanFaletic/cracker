@@ -85,6 +85,8 @@ def disconnect_logic(s: Saleae) -> None:
 
 def configure_logic(log: Saleae) -> None:
     log.set_capture_seconds(1024)
+    log.capture_start()
+    sleep(1)
 
 
 def save_data(log: Saleae) -> None:
@@ -126,7 +128,6 @@ def run_sweep(key: list, digit: int) -> None:
     try_key = deepcopy(key)
     configure_logic(analyzer)
 
-    analyzer.capture_start()
     for try_id in range(256):
         try_key[digit] = try_id
         check_key(ttyUSB, try_key)

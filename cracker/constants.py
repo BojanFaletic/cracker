@@ -10,7 +10,7 @@ RX = 2
 
 # sending
 PACKET_SIZE = 4
-DIGIT_IDLE_TIME = 0.2
+DIGIT_IDLE_TIME = 0.05
 
 # Status bits
 WAVEFORM_FILE = 'data/logic_data.csv'
