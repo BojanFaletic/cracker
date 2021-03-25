@@ -98,6 +98,27 @@ def check_key(ser: Serial, try_key: list) -> None:
     sleep(DIGIT_IDLE_TIME+0.1)
 
 
+def brute_force(key: list) -> None:
+    # search last 2 bytes with brute force
+    serial = connect_serial()
+
+    try_key = deepcopy(key)
+    for byte_6 in range(256):
+        for byte_7 in range(256):
+            try_key[5] = byte_6
+            try_key[6] = byte_7
+
+            try_combination(serial, try_key)
+            if is_unlocked(serial):
+                print(f'UNLOCKED: with key {try_key}')
+                logging.info(f'UNLOCKED: key: {try_key}')
+                print('Terminating')
+                disconnect_serial()
+                exit(0)
+    disconnect_serial()
+    print(f'Brute force failed: {key}')
+
+
 def run_sweep(key: list, digit: int) -> None:
     analyzer = connect_logic()
     ttyUSB = connect_serial()

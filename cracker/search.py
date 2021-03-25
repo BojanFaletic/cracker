@@ -1,57 +1,7 @@
+from cracker.digit import check_digit
+from cracker.brute_force import brute_force
+from graph import Graph
 import logging
-import pickle
-import os
-
-# if program is in testing mode then overwrite methods
-if os.getenv('TEST'):
-    from test_overide_methods import check_byte, brute_force
-else:
-    from cracker.digit import check_digit as check_byte
-    from cracker.brute_force import brute_force
-
-
-class Graph:
-    def __init__(self, max_depth, filename):
-        self.graph_filename = filename + '_graph.pkl'
-        self.visited_filename = filename + '_visited.pkl'
-
-        self.max_depth = max_depth
-        self.graph = {}
-        self.visited_graph = {}
-        for i in range(max_depth):
-            self.graph[i] = []
-            self.visited_graph[i] = []
-
-    def add_possible_paths(self, depth, paths):
-        self.graph[depth].append(paths)
-
-    def add_explored_path(self, depth, path):
-        self.visited_graph[depth].append(path)
-
-    def unexplored_paths(self, depth):
-        for el in self.graph[depth]:
-            if not (el in self.visited_graph[depth]):
-                return el
-        return None
-
-    def save(self):
-        with open(self.graph_filename, 'wb') as f:
-            pickle.dump(self.graph, f)
-        with open(self.visited_filename, 'wb') as f:
-            pickle.dump(self.visited_graph, f)
-
-    def load(self):
-        try:
-            with open(self.graph_filename, 'rb') as f:
-                self.graph = pickle.load(f)
-        except FileNotFoundError:
-            print('Graph not found, starting fresh')
-
-        try:
-            with open(self.visited_filename, 'rb') as f:
-                self.visited_graph = pickle.load(f)
-        except FileNotFoundError:
-            print('Visited graph not found, starting fresh')
 
 
 def depth_search(gr: Graph, depth=0, key=[0]*7):
@@ -69,7 +19,7 @@ def depth_search(gr: Graph, depth=0, key=[0]*7):
     # if no path exist start from beginning
     if depth == 0:
         # find most probable codes and add them to number
-        possible_paths = check_byte(key, depth)
+        possible_paths = check_digit(key, depth)
         gr.add_possible_paths(depth, possible_paths)
 
     # depth first search on unexplored paths
@@ -78,7 +28,7 @@ def depth_search(gr: Graph, depth=0, key=[0]*7):
             return
 
         # find possible path from this position
-        possible_paths = check_byte(key, depth)
+        possible_paths = check_digit(key, depth)
         gr.add_possible_paths(depth, possible_paths)
 
         key[depth] = path
