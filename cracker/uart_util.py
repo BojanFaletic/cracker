@@ -36,7 +36,7 @@ def is_unlocked(ser: Serial) -> bool:
     INVALID_ID = [0x80, 0x04]
     VALID_ID = [0x80, 0x0c]
 
-    status = read_request()
+    status = read_request(ser)
     if len(status) == 0:
         logging.warn('UART is empty, error?')
         return False
