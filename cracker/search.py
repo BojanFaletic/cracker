@@ -1,5 +1,5 @@
 from cracker.digit import check_digit
-from cracker.brute_force import brute_force
+from cracker.uart_util import brute_force
 from graph import Graph
 import logging
 
