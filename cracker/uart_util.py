@@ -84,7 +84,7 @@ def disconnect_logic(s: Saleae) -> None:
 
 
 def configure_logic(log: Saleae) -> None:
-    log.set_capture_seconds(170)
+    log.set_capture_seconds(1024)
 
 
 def save_data(log: Saleae) -> None:
