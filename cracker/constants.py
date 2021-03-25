@@ -15,5 +15,5 @@ DIGIT_IDLE_TIME = 0.05
 # Status bits
 WAVEFORM_FILE = 'data/logic_data.csv'
 PLOT_DIR = 'plots/'
-RAW_DIR = 'checkpoints/'
+RAW_DIR = 'checkpoint/'
 
