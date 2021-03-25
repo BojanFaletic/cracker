@@ -1,6 +1,7 @@
 import os
 import logging
-from cracker.graph import depth_search, Graph
+from cracker import Graph, depth_search
+
 logging.basicConfig(filename='program.log', encoding='utf-8',
                     level=logging.INFO)
 
