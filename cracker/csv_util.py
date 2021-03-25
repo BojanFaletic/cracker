@@ -55,7 +55,7 @@ def decode_line(line: str) -> (int, float):
 
 def read_csv(st: Static, f_name=WAVEFORM_FILE) -> None:
     with open(f_name, 'r') as f:
-        check_csv_header(f.readable())
-        while data := f.readable():
+        check_csv_header(f.readline())
+        while data := f.readline():
             value, time = decode_line(data)
             decode_UART(st, value, time)
