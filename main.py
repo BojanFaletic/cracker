@@ -1,9 +1,8 @@
 import os
 import logging
+from cracker.graph import depth_search, Graph
 logging.basicConfig(filename='program.log', encoding='utf-8',
                     level=logging.INFO)
-
-from cracker.search import depth_search, Graph
 
 
 def create_directories():

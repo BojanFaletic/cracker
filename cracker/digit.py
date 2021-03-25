@@ -1,4 +1,4 @@
-from cracker.constants import Static
+from cracker.static import Static
 from cracker.data_util import is_data_valid, process_deltas, most_probable_keys
 from cracker.csv_util import read_csv
 from cracker.uart_util import run_sweep

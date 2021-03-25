@@ -1,6 +1,6 @@
 import numpy as np
 from heapq import nlargest
-from cracker.constants import Static
+from cracker.static import Static
 
 
 def is_data_idx_valid(st: Static) -> bool:

@@ -1,4 +1,5 @@
-from cracker.constants import Static, IDLE, TX, RX, WAVEFORM_FILE
+from cracker.constants import IDLE, TX, RX, WAVEFORM_FILE
+from cracker.static import Static
 
 
 def to_signal(value_: int) -> int:
