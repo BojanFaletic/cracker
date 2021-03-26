@@ -33,7 +33,7 @@ def select_digit(st: Static, time_: float) -> None:
         raise IndexError
 
 
-def decode_UART(st: Static, value_: int, time_: float):
+def decode_UART(st: Static, value_: int, time_: float) -> None:
     wait_until_transmit(st, value_)
     wait_until_receive(st, value_, time_)
     select_digit(st, time_)

@@ -1,16 +1,14 @@
-from .debug_util import check_digit, brute_force
 from .node import Node, depth, next_unexplored_paths, history, set_explored
+from .digit import check_digit
+from .uart_util import brute_force
 
-# from .digit import check_digit
-# from .uart_util import brute_force
 
-
-def crack(nd: Node):
+def crack(nd: Node) -> None:
     key, _ = key_from_histor(nd)
     brute_force(key)
 
 
-def key_from_histor(nd: Node):
+def key_from_histor(nd: Node) -> (list, int):
     hist = history(nd)
     depth = len(hist)
     key = [0] * 7
@@ -19,7 +17,7 @@ def key_from_histor(nd: Node):
     return key, depth
 
 
-def connect_node(nd: Node):
+def connect_node(nd: Node) -> None:
     key, depth = key_from_histor(nd)
     most_likely = check_digit(key, depth)
     for el in most_likely:
@@ -27,12 +25,12 @@ def connect_node(nd: Node):
         nd.connect_next(nd_new)
 
 
-def explore(nd: Node, max_depth):
+def explore(nd: Node, max_depth) -> None:
     for path in next_unexplored_paths(nd):
         depth_search(path, max_depth)
 
 
-def depth_search(nd: Node, max_depth=5):
+def depth_search(nd: Node, max_depth=5) -> None:
     if depth(nd) == max_depth+1:
         crack(nd)
         set_explored(nd)
@@ -41,6 +39,6 @@ def depth_search(nd: Node, max_depth=5):
     explore(nd, max_depth)
 
 
-def search():
+def search() -> None:
     nd = Node(-1)
     depth_search(nd)
