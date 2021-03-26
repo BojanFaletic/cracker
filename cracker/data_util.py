@@ -28,8 +28,9 @@ def print_data_summary(d: np.array) -> None:
     avg_v = np.mean(d.T[2])
     div_v = np.mean(d.T[3])
 
-    logging.info(f'''min: {min_v}, max: {max_v},\
-         average: {avg_v}, deviation: {div_v}''')
+    logging.info(f'''\
+        min: {min_v:10.3E}, max: {max_v:10.3E},
+        average: {avg_v:10.3E}, deviation: {div_v:10.3E}''')
 
 
 def process_deltas(st: Static) -> np.array:
