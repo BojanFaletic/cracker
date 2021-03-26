@@ -49,5 +49,5 @@ def process_deltas(st: Static) -> np.array:
 
 def most_probable_keys(data_: np.array) -> list:
     POSSIBLE_KEYS = 3
-    minimum_time = data_.T[0]
-    return nlargest(POSSIBLE_KEYS, range(len(minimum_time)), minimum_time.take)
+    average = data_.T[2]
+    return nlargest(POSSIBLE_KEYS, range(len(average)), average.take)

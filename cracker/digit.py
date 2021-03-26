@@ -15,7 +15,41 @@ def key_to_label(key: list) -> str:
     return key_id
 
 
-def check_digit(key_: list, digit_: int) -> None:
+def is_digit_correct(fist_: list, second_: list) -> bool:
+    for el in fist_:
+        if el in second_:
+            return True
+    return False
+
+
+def correct_digit(first_: list, second_: list) -> list:
+    new_key = []
+    for el in first_:
+        if el in second_:
+            new_key.append(el)
+
+    if not first_[0] in new_key:
+        new_key.append(first_[0])
+    if not second_[0] in new_key:
+        new_key.append(second_[0])
+    return new_key
+
+
+def check_correct_digit(key_: list, digit_: int) -> list:
+    first_pass = check_digit(key_, digit_)
+
+    while True:
+        second_pass = first_pass
+        first_pass = check_digit(key_, digit_)
+        if is_digit_correct(first_pass, second_pass):
+            break
+
+    key = correct_digit(first_pass, second_pass)
+    logging.info(f'Found digit: {key[0]}, depth: {digit_}')
+    return key
+
+
+def check_digit(key_: list, digit_: int) -> list:
     MAX_TRES = 3
 
     idx = 0

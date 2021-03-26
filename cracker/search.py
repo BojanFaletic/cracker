@@ -1,5 +1,5 @@
 from .node import Node, depth, next_unexplored_paths, history, set_explored
-from .digit import check_digit
+from .digit import check_correct_digit
 from .uart_util import brute_force
 
 
@@ -19,7 +19,7 @@ def key_from_histor(nd: Node) -> (list, int):
 
 def connect_node(nd: Node) -> None:
     key, depth = key_from_histor(nd)
-    most_likely = check_digit(key, depth)
+    most_likely = check_correct_digit(key, depth)
     for el in most_likely:
         nd_new = Node(el)
         nd.connect_next(nd_new)
