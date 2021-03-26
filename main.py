@@ -1,13 +1,13 @@
 import os
 import logging
-from cracker import Graph, depth_search
+from cracker import search
 
 logging.basicConfig(filename='program.log', encoding='utf-8',
                     level=logging.INFO)
 
 
 def create_directories():
-    required_dir = ['data', 'tree', 'checkpoint', 'plots']
+    required_dir = ['log', 'log/temp', 'log/plots', 'log/numpy']
     for r_dir in required_dir:
         if not os.path.exists(r_dir):
             os.makedirs(r_dir)
@@ -18,14 +18,11 @@ def init_log():
 
 
 def run():
-    graph = Graph(max_depth=5, filename='tree/tree')
-    graph.load()
     try:
-        depth_search(graph)
+        search()
     except KeyboardInterrupt:
         print('Exiting')
     finally:
-        graph.save()
         logging.info('******* STOP logging ******* ')
 
 

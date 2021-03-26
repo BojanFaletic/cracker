@@ -1,10 +1,9 @@
-from cracker.csv_util import read_csv
-from cracker.data_util import is_data_valid
-from cracker.static import Static
+from cracker import search
 
 
-static = Static()
-read_csv(static, f_name='experiments/data/logic_data.csv')
+def test_deep_search():
+    search()
 
 
-print(is_data_valid(static))
+if __name__ == "__main__":
+    test_deep_search()

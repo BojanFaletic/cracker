@@ -12,8 +12,18 @@ RX = 2
 PACKET_SIZE = 4
 DIGIT_IDLE_TIME = 0.05
 
-# Status bits
-WAVEFORM_FILE = 'data/logic_data.csv'
-PLOT_DIR = 'plots/'
-RAW_DIR = 'checkpoint/'
+# Filename
+WAVEFORM = 'logic_data.csv'
+LOG = 'program_log.txt'
 
+# Folders
+TOP_FOLDER = 'log'
+WAVEFORM_FOLDER = 'temp'
+PLOT_FOLDER = 'plots'
+NUMPY_SUMMARY = 'numpy'
+
+# Files
+WAVEFORM_FILE = TOP_FOLDER + '/' + WAVEFORM_FOLDER + '/' + WAVEFORM
+PLOT_FILE = TOP_FOLDER + '/' + PLOT_FOLDER + '/'
+NUMPY_FILE = TOP_FOLDER + '/' + NUMPY_SUMMARY + '/'
+LOG_FILE = TOP_FOLDER + '/' + LOG

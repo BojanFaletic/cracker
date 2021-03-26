@@ -1,2 +1,1 @@
-from .graph import Graph # noqa
-from .search import depth_search # noqa
+from .search import search # noqa
