@@ -41,4 +41,4 @@ def depth_search(nd: Node, max_depth=5) -> None:
 
 def search() -> None:
     nd = Node(-1)
-    depth_search(nd)
+    depth_search(nd, max_depth=6)
