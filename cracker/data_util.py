@@ -1,6 +1,7 @@
 import numpy as np
 from heapq import nlargest
 from cracker.static import Static
+import logging
 
 
 def is_data_idx_valid(st: Static) -> bool:
@@ -21,6 +22,16 @@ def is_data_valid(st: Static) -> bool:
     return is_data_idx_valid(st) and is_data_length_valid(st)
 
 
+def print_data_summary(d: np.array) -> None:
+    min_v = np.mean(d.T[0])
+    max_v = np.mean(d.T[1])
+    avg_v = np.mean(d.T[2])
+    div_v = np.mean(d.T[3])
+
+    logging.info(f'''min: {min_v}, max: {max_v},\
+         average: {avg_v}, deviation: {div_v}''')
+
+
 def process_deltas(st: Static) -> np.array:
     data = np.zeros((256, 4))
     for digit_id in range(256):
@@ -30,6 +41,8 @@ def process_deltas(st: Static) -> np.array:
         divination = np.std(st.deltas[digit_id])
 
         data[digit_id] = [min_value, max_value, average_value, divination]
+
+    print_data_summary(data)
     return data
 
 
