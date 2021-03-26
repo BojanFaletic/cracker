@@ -9,7 +9,7 @@ TX = 1
 RX = 2
 
 # sending
-PACKET_SIZE = 4
+PACKET_SIZE = 128
 DIGIT_IDLE_TIME = 0.05
 
 # Filename
