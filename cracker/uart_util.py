@@ -1,7 +1,7 @@
 from serial import Serial, SerialException
 from saleae import Saleae
 import logging
-from copy import deepcopy
+from tqdm import trange
 from time import sleep
 from cracker.constants import PORT, BAUD, PACKET_SIZE,\
      DIGIT_IDLE_TIME, WAVEFORM_FILE
@@ -142,12 +142,12 @@ def run_sweep(key: list, digit: int) -> None:
     analyzer = connect_logic()
     ttyUSB = connect_serial()
 
-    try_key = deepcopy(key)
     configure_logic(analyzer)
 
-    for try_id in range(256):
-        try_key[digit] = try_id
-        check_key(ttyUSB, try_key)
+    logging.info(f'Try digit: {digit}')
+    for try_id in trange(256):
+        key[digit] = try_id
+        check_key(ttyUSB, key)
 
     sleep(DIGIT_IDLE_TIME)
     analyzer.capture_stop()
