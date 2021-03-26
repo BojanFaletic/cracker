@@ -1,17 +1,17 @@
-from cracker.constants import PLOT_DIR, RAW_DIR
+from cracker.constants import PLOT_FILE, NUMPY_FILE
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def save_average_plot(time_: np.array, min_: np.array, max_: np.array,
                       average_: np.array, label_: str) -> None:
-    plot_name_avg = PLOT_DIR + label_ + '_min_max_avg.png'
+    plot_name_avg = PLOT_FILE + label_ + '_min_max_avg.png'
     plt.plot(time_, min_, time_, max_, time_, average_)
     plt.savefig(plot_name_avg)
 
 
 def save_std_pot(time_: np.array, std_: np.array, label_: str) -> None:
-    plot_name_std = PLOT_DIR + label_ + '_avg_std.png'
+    plot_name_std = PLOT_FILE + label_ + '_avg_std.png'
     plt.plot(time_, std_)
     plt.savefig(plot_name_std)
 
@@ -28,7 +28,7 @@ def save_plot_data(data_: np.array, label_: str) -> None:
 
 
 def save_raw_data(data_: np.array, label_: str) -> None:
-    check_name = RAW_DIR + label_ + '.npy'
+    check_name = NUMPY_FILE + label_ + '.npy'
     np.save(check_name, data_)
 
 
