@@ -10,10 +10,9 @@ def crack(nd: Node, max_depth_) -> None:
 
 def key_from_histor(nd: Node) -> (list, int):
     hist = history(nd)
-    hist_reverse = hist[::-1]
     depth = len(hist)
     key = [0] * 7
-    for i, el in enumerate(hist_reverse):
+    for i, el in enumerate(hist):
         key[i] = el
     return key, depth
 
