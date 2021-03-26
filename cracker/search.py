@@ -3,9 +3,9 @@ from .digit import check_digit
 from .uart_util import brute_force
 
 
-def crack(nd: Node) -> None:
+def crack(nd: Node, max_depth_) -> None:
     key, _ = key_from_histor(nd)
-    brute_force(key)
+    brute_force(key, max_depth_)
 
 
 def key_from_histor(nd: Node) -> (list, int):
@@ -32,7 +32,7 @@ def explore(nd: Node, max_depth) -> None:
 
 def depth_search(nd: Node, max_depth=5) -> None:
     if depth(nd) == max_depth+1:
-        crack(nd)
+        crack(nd, max_depth)
         set_explored(nd)
         return
     connect_node(nd)
