@@ -144,8 +144,8 @@ def run_sweep(key: list, digit: int) -> None:
 
     configure_logic(analyzer)
 
-    logging.info(f'Try digit: {digit}')
-    for try_id in trange(256):
+    title = f'Try digit: {digit}'
+    for try_id in trange(256, desc=title):
         key[digit] = try_id
         check_key(ttyUSB, key)
 

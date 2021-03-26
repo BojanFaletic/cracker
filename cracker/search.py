@@ -9,7 +9,7 @@ def crack(nd: Node, max_depth_) -> None:
 
 
 def key_from_histor(nd: Node) -> (list, int):
-    hist = history(nd)
+    hist = history(nd)[::-1]
     depth = len(hist)
     key = [0] * 7
     for i, el in enumerate(hist):
