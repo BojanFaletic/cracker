@@ -8,18 +8,14 @@ def crack(nd: Node, max_depth_) -> None:
     brute_force(key, max_depth_)
 
 
-def reverse_key(key_: list) -> list:
-    return key_[::-1]
-
-
 def key_from_histor(nd: Node) -> (list, int):
     hist = history(nd)
+    hist_reverse = hist[::-1]
     depth = len(hist)
     key = [0] * 7
-    for i, el in enumerate(hist):
+    for i, el in enumerate(hist_reverse):
         key[i] = el
-    rev_key = reverse_key(key)
-    return rev_key, depth
+    return key, depth
 
 
 def connect_node(nd: Node) -> None:
