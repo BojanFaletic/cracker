@@ -1,9 +1,5 @@
-from cracker import search
-
-
-def test_deep_search():
-    search()
+from cracker.uart_util import brute_force
 
 
 if __name__ == "__main__":
-    test_deep_search()
+    brute_force([0]*7, 6)
