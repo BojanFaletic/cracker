@@ -117,7 +117,7 @@ def brute_force_2byte(ser: Serial, key_: list) -> bool:
 
 
 def brute_force(key: list, max_depth) -> bool:
-    if max_depth != 5 or max_depth != 6:
+    if not (max_depth == 5 or max_depth == 6):
         logging.error('Max depth not supported')
         exit(1)
 
