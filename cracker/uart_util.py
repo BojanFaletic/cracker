@@ -19,7 +19,7 @@ def read(ser: Serial, length: int) -> list:
 
 
 def try_combination(ser: Serial, combination: list) -> None:
-    HEADER_KEY = bytearray([0xf5, 0xdf, 0xff, 0x00, 0x07])
+    HEADER_KEY = [0xf5, 0xdf, 0xff, 0x00, 0x07]
     for byte in HEADER_KEY:
         write(ser, byte)
 
@@ -103,24 +103,24 @@ def check_key(ser: Serial, try_key: list) -> None:
 def brute_force_1byte(ser: Serial, key_: list) -> bool:
     for byte_7 in range(256):
         key_[6] = byte_7
-        try_combination(ser, key_)
-        if is_unlocked(ser):
-            print(f'UNLOCKED: with key {key_}')
-            logging.info(f'UNLOCKED: key: {key_}')
-            print('Terminating')
+        if check_combination(ser, key_):
             return True
     return False
 
 
 def brute_force_2byte(ser: Serial, key_: list) -> bool:
     for byte_6 in range(256):
-        key_[6] = byte_6
+        key_[5] = byte_6
         if brute_force_1byte(ser, key_):
             return True
     return False
 
 
 def brute_force(key: list, max_depth) -> bool:
+    if max_depth != 5 or max_depth != 6:
+        logging.error('Max depth not supported')
+        exit(1)
+
     serial = connect_serial()
     status = None
     if max_depth == 5:
@@ -129,8 +129,8 @@ def brute_force(key: list, max_depth) -> bool:
         status = brute_force_1byte(serial, key)
     else:
         logging.error('max depth not correct')
-    disconnect_serial(serial)
 
+    disconnect_serial(serial)
     if status:
         exit(0)
     else:

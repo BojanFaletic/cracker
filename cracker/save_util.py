@@ -8,12 +8,14 @@ def save_average_plot(time_: np.array, min_: np.array, max_: np.array,
     plot_name_avg = PLOT_FILE + label_ + '_min_max_avg.png'
     plt.plot(time_, min_, time_, max_, time_, average_)
     plt.savefig(plot_name_avg)
+    plt.close()
 
 
 def save_std_pot(time_: np.array, std_: np.array, label_: str) -> None:
     plot_name_std = PLOT_FILE + label_ + '_avg_std.png'
     plt.plot(time_, std_)
     plt.savefig(plot_name_std)
+    plt.close()
 
 
 def save_plot_data(data_: np.array, label_: str) -> None:
