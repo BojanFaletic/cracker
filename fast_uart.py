@@ -1,7 +1,9 @@
 from serial import Serial
 from time import sleep
 
-''' Try crack single byte. Run logic for ~300 sec '''
+''' 1) Try crack single byte. Run logic for ~300 sec '''
+''' 2) Save logic to CSV file (this directory) '''
+''' 3) Run read_csv.py to display time '''
 
 ser = Serial('COM3', 9600)
 ser.close()
