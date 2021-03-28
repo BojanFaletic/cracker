@@ -1,8 +1,15 @@
 # Cracker
 
-Guess ID for microprocessor.
+Guess ID for microprocessor renesas R8C. Main idea is to send header+key and mesure response time. 
+If byte of ID is correct, response time is expected to be longer.  
 
-# How to run
+
+## Project status
+
+For now project was unsuccessful. The main issue is lack of speed from microcprocessor. 
+My current understanding is that cracking ID with this method is not feasable for this family of microprocessors.  
+
+## How to run
 
 1) Install Python+3.5, pip
 
@@ -18,7 +25,7 @@ Guess ID for microprocessor.
 $ python main.py
 ```
 
-# Output
+## Output
 
 * Log of program is stored in program.log.
 * Folder tree contains explored graph in .pkl file, this is used
