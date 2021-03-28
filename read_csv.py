@@ -34,5 +34,8 @@ def read_file(file='logic.csv'):
 data = read_file()
 print(f'Largest value: {np.argmax(data)}')
 plt.plot(data)
+plt.xlabel('Combination')
+plt.ylabel('Required time [s]')
+plt.savefig('read_csv.png')
 plt.show()
 exit(0)
