@@ -6,6 +6,7 @@ import numpy as np
 MASK = 0x3
 TIMEOUT = 0.2
 
+
 def read_file(file='logic.csv'):
     deltas = []
     try:
