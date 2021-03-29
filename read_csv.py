@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+TIMEOUT = 0.001
 
 def read_file(file='logic.csv'):
     deltas = []
@@ -19,9 +20,13 @@ def read_file(file='logic.csv'):
                     if value == 1:
                         state = 1
                 else:
+                    d = t1-t0
                     if value == 2:
                         state = 0
-                        deltas.append(t1-t0)
+                        deltas.append(d)
+                    if d > TIMEOUT:
+                        deltas.append(d)
+                        state = 0
 
                 t0 = t1
     except FileNotFoundError:
