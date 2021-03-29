@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-TIMEOUT = 0.001
+# Channel 0 = TX
+# Channel 1 = RX
+MASK = 0x3
+TIMEOUT = 0.2
 
 def read_file(file='logic.csv'):
     deltas = []
@@ -14,7 +17,7 @@ def read_file(file='logic.csv'):
             while data := f.readline():
                 raw_time, raw_value = data.split(',')
                 t1 = float(raw_time)
-                value = (~int(raw_value, 16)) & 0xF
+                value = (~int(raw_value, 16)) & MASK
 
                 if state == 0:
                     if value == 1:
