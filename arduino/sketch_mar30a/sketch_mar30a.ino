@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
 
+
 // HW
 const int MODE = 3;
 const int RESET = 4;
@@ -9,6 +10,40 @@ const int TX_1 = 9;
 
 
 SoftwareSerial targetSerial(RX_1, TX_1);
+
+constexpr uint8_t NOT(uint8_t x){
+  return x^1;
+}
+
+namespace vdd{
+  void on(){
+    digitalWrite(VDD_SWICH, 0);
+  }
+  void off(){
+    digitalWrite(VDD_SWICH, 1);
+  }
+}
+
+namespace rst{
+  void off(){
+    digitalWrite(RESET, 1);
+  }
+  void on(){
+    digitalWrite(RESET, 0);
+  }
+}
+
+namespace mode{
+  void bootloader(){
+    digitalWrite(MODE, 1);
+  }
+  void program(){
+    digitalWrite(MODE, 0);
+  }
+}
+
+
+
 
 
 void setup() {
@@ -29,11 +64,11 @@ int send_1byte(uint8_t key){
     delay(30);
   }
 
-  digitalWrite(RESET, 0);
-  digitalWrite(VDD_SWICH, 0);
+  rst::off();
+  vdd::off();
 
   delay(100);
-  digitalWrite(VDD_SWICH, 1);
+  vdd::on();
   delay(100);
 
   // send key
@@ -76,22 +111,22 @@ void send_256_bytes(){
 }
 
 
-void finish_sequence(){
-  digitalWrite(MODE, 1);
-  digitalWrite(RESET, 0);
+void reset_target(){
+  mode::bootloader();
+  rst::off();
   delay(100);
-  digitalWrite(VDD_SWICH, 0);
+  vdd::off();
 }
 
-void reset_target(){
-  digitalWrite(VDD_SWICH, 1);
-  digitalWrite(RESET, 1);
-  digitalWrite(MODE, 1);
+void bootload_target(){
+  vdd::on();
+  rst::on();
+  mode::bootloader();
 
   delay(100);
 
-  digitalWrite(MODE, 0);
-  digitalWrite(RESET, 0);
+  mode::program();
+  rst::off();
 }
 
 
@@ -101,7 +136,7 @@ void loop() {
   Serial.println("Hello world");
 
   // program
-  reset_target();
+  bootload_target();
   send_256_bytes();
-  finish_sequence();
+  reset_target();
 }

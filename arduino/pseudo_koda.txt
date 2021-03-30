@@ -1,0 +1,34 @@
+
+
+----- BOOTLOAD TARGET ------
+  -> Napajanje = 1 [vdd::on]
+  -> Reset = 1 [rst::on]
+  -> Mode = 1 [mode::bootloader]
+
+  -> POCAKAJ
+
+  -> Mode = 0 [mode::program]
+  -> Reset = 0 (reset)
+--------------------------------
+
+
+--------------------- SEND_256_BYTE -----------
+  ------ PONAVLJAJ ----
+      -> Posliji UART (16 x 0)
+
+      -> Reset = 0
+      -> Napajanje = 0
+
+      -> Napajanje = 1
+
+      --> Poslji kljuc [7bytov]
+      --> Merimo cas (0x70 do odgovora, izpis casa)
+  ------ PONAVLJAJ ----
+---------------------------------
+
+------ RESET TARGET --------
+  -> Mode = 1
+  -> Reset = 0 (kratek cas)
+  -> Napajanje = 0
+---------------------------
+
