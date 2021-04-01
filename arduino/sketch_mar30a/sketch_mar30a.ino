@@ -7,42 +7,42 @@ const int RESET = 4;
 const int VDD_SWICH = 5;
 const int RX_1 = 8;
 const int TX_1 = 9;
-/*moje*/
-const int START_TIPKA = 11;
+/*My*/
+const int BUTTON_PIN  = 11;
 
 
 
 SoftwareSerial targetSerial(RX_1, TX_1);
 
-constexpr uint8_t NOT(uint8_t x){
-  return x^1;
+constexpr uint8_t NOT(uint8_t x) {
+  return x ^ 1;
 }
 
-namespace vdd{
-  void on(){
-    digitalWrite(VDD_SWICH, 0);
-  }
-  void off(){
-    digitalWrite(VDD_SWICH, 1);
-  }
+namespace vdd {
+void on() {
+  digitalWrite(VDD_SWICH, 0);
+}
+void off() {
+  digitalWrite(VDD_SWICH, 1);
+}
 }
 
-namespace rst{
-  void off(){
-    digitalWrite(RESET, 1);
-  }
-  void on(){
-    digitalWrite(RESET, 0);
-  }
+namespace rst {
+void off() {
+  digitalWrite(RESET, 1);
+}
+void on() {
+  digitalWrite(RESET, 0);
+}
 }
 
-namespace mode{
-  void bootloader(){
-    digitalWrite(MODE, 1);
-  }
-  void program(){
-    digitalWrite(MODE, 0);
-  }
+namespace mode {
+void bootloader() {
+  digitalWrite(MODE, 1);
+}
+void program() {
+  digitalWrite(MODE, 0);
+}
 }
 
 
@@ -54,14 +54,14 @@ void setup() {
   pinMode(MODE, OUTPUT);
   pinMode(RESET, OUTPUT);
   pinMode(VDD_SWICH, OUTPUT);
-  /*moje*/
-  pinMode(START_TIPKA, INPUT);
+  /*My*/
+  pinMode(BUTTON_PIN, INPUT);
 }
 
-int send_1byte(uint8_t key){
+int send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
-  for (int i=0; i<16; i++){
+  for (int i = 0; i < 16; i++) {
     targetSerial.write(zero);
     delay(30);
   }
@@ -69,7 +69,7 @@ int send_1byte(uint8_t key){
   rst::off();
   delay(20);
   rst::on();
-  
+
   delay(100);
 
   // send key
@@ -92,17 +92,17 @@ int send_1byte(uint8_t key){
   return duration;
 }
 
-void send_256_bytes(){
+void send_256_bytes() {
   int max_value = 0;
   int max_digit = 0;
-  for (int k=0; k<256; k++){
+  for (int k = 0; k < 256; k++) {
     int requred_time = send_1byte(k);
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" requred time: ");
     Serial.println(requred_time);
 
-    if (max_value < requred_time){
+    if (max_value < requred_time) {
       max_value = requred_time;
       max_digit = k;
     }
@@ -112,7 +112,7 @@ void send_256_bytes(){
 }
 
 
-void reset_target(){
+void reset_target() {
   mode::program();
   delay(50);
   rst::off();
@@ -124,24 +124,24 @@ void reset_target(){
   delay(100);
 }
 
-void bootload_target(){
+void bootload_target() {
   //Začetek delovanja
   vdd::on();
   rst::on();
   mode::program();
-  
+
   delay(100);
-  
-  //Spravimo v navadno delovanje R8C
+
+  //We send R8C to normall working.
   rst::off();
   delay(20);
   rst::on();
   delay(50);
   vdd::off();
-  
+
   delay(100);
 
-  //Spravimo R8C v bootloader delovanje
+  //We send R8C to bootloader.
   vdd::on();
   delay(50);
   mode::bootloader();
@@ -156,21 +156,21 @@ void bootload_target(){
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println("Hello world");
- 
-  /*moje, da dokler ne pritisneš tipke, ne naredi nič*/
-  while (digitalRead(START_TIPKA) == HIGH) {
-  //Naredi nič.
+  Serial.println("Press button to start crecking process.");
+
+  /*my, no code because no code is procesed.*/
+  while (digitalRead(BUTTON_PIN) == HIGH) {
+    //Naredi nič.
   }
 
-  Serial.println("Zacetek delovanja");
+  Serial.println("Start of process");
 
-  
+
   bootload_target();
   send_256_bytes();
   reset_target();
 
-   Serial.println("Konec delovanja");
+  Serial.println("End of process");
 
-  while(1);
+  while (1);
 }
