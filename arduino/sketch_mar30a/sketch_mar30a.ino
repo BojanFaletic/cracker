@@ -7,6 +7,9 @@ const int RESET = 4;
 const int VDD_SWICH = 5;
 const int RX_1 = 8;
 const int TX_1 = 9;
+/*moje*/
+const int START_TIPKA = 11;
+
 
 
 SoftwareSerial targetSerial(RX_1, TX_1);
@@ -43,9 +46,6 @@ namespace mode{
 }
 
 
-
-
-
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -54,6 +54,8 @@ void setup() {
   pinMode(MODE, OUTPUT);
   pinMode(RESET, OUTPUT);
   pinMode(VDD_SWICH, OUTPUT);
+  /*moje*/
+  pinMode(START_TIPKA, INPUT);
 }
 
 int send_1byte(uint8_t key){
@@ -65,10 +67,9 @@ int send_1byte(uint8_t key){
   }
 
   rst::off();
-  vdd::off();
-
-  delay(100);
-  vdd::on();
+  delay(20);
+  rst::on();
+  
   delay(100);
 
   // send key
@@ -112,31 +113,64 @@ void send_256_bytes(){
 
 
 void reset_target(){
-  mode::bootloader();
+  mode::program();
+  delay(50);
   rst::off();
-  delay(100);
+  delay(20);
+  rst::on();
+  delay(50);
   vdd::off();
+
+  delay(100);
 }
 
 void bootload_target(){
+  //Začetek delovanja
   vdd::on();
   rst::on();
-  mode::bootloader();
-
+  mode::program();
+  
+  delay(100);
+  
+  //Spravimo v navadno delovanje R8C
+  rst::off();
+  delay(20);
+  rst::on();
+  delay(50);
+  vdd::off();
+  
   delay(100);
 
-  mode::program();
+  //Spravimo R8C v bootloader delovanje
+  vdd::on();
+  delay(50);
+  mode::bootloader();
+  delay(50);
   rst::off();
+  delay(20);
+  rst::on();
+
+  delay(30);
 }
 
 
 void loop() {
   // put your main code here, to run repeatedly:
-
   Serial.println("Hello world");
+ 
+  /*moje, da dokler ne pritisneš tipke, ne naredi nič*/
+  while (digitalRead(START_TIPKA) == HIGH) {
+  //Naredi nič.
+  }
 
-  // program
+  Serial.println("Zacetek delovanja");
+
+  
   bootload_target();
   send_256_bytes();
   reset_target();
+
+   Serial.println("Konec delovanja");
+
+  while(1);
 }

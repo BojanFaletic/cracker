@@ -10,8 +10,8 @@ ser.close()
 
 for key in range(256):
     ser.open()
-    sleep(0.2)
-    # send 16 zeros
+    sleep(0.02)
+     # send 16 zeros
     for _ in range(16):
         ser.write(b'\x00')
         sleep(0.03)
@@ -22,6 +22,7 @@ for key in range(256):
     ser.write(b'\x00')
     ser.write(b'\x07')
     # key
+    
     ser.write(bytes([key]))
     ser.write(b'\x00')
     ser.write(b'\x00')
@@ -32,6 +33,6 @@ for key in range(256):
     # read
     ser.write(b'\x70')
     ser.flush()
-    sleep(0.2)
+    sleep(0.02)
     ser.close()
-    sleep(0.2)
+    
