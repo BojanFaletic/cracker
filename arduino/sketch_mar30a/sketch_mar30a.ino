@@ -112,6 +112,7 @@ int send_1byte(uint8_t key) {
 
   // wait for some time
   delay(200);
+  return INT::getTimerTicks();
 }
 
 void send_256_bytes() {
