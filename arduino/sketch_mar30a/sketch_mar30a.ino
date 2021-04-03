@@ -46,23 +46,23 @@ namespace INT {
 void stop();
 
 void startTimer1() {
-  /*Set counter lower and upper byte to 0.*/
-  /*Set timer to normal mode and set prescaler to 1. This should start the
-   * timer?*/
+  // Reset TCCR1A options since Arduino likes to enable some of them. 
+  TCCR1A = 0x00;
+  // Set timer to normal mode and set prescaler to 1.
   TCCR1B = 0x01;
+  // Set counter value to 0
   TCNT1 = 0x00;
 }
 
 void stopTimer1() {
-  /*Set timer to normal mode and set prescaler to 0. This should stop the
-   * timer?*/
+  // Set timer to normal mode and set prescaler to 0.
   TCCR1B = 0x00;
 }
 
 bool isTimerActive() { return TCCR1B & 0x01; }
 
 unsigned int getTimerTicks() {
-  /*Get upper and lower counter byte to ticks.*/
+  // Get upper and lower counter byte to ticks.
   return TCNT1;
 }
 
