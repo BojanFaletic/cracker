@@ -44,14 +44,14 @@ void setup() {
 
 namespace INT {
 
-static unsigned int noOfTicks; 
+static unsigned int noOfTicks;
 
 void stop();
 
 void startTimer1() {
   // Set counter value to 0
   TCNT1 = 0x00;
-  // Reset TCCR1A options since Arduino likes to enable some of them. 
+  // Reset TCCR1A options since Arduino likes to enable some of them.
   TCCR1A = 0x00;
   // Set timer to normal mode and set prescaler to 1.
   TCCR1B = 0x01;
@@ -82,7 +82,7 @@ void stop() {
 
 } // namespace INT
 
-int send_1byte(uint8_t key) {
+unsigned int send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
   for (int i = 0; i < 16; i++) {
@@ -119,10 +119,10 @@ int send_1byte(uint8_t key) {
 }
 
 void send_256_bytes() {
-  int max_value = 0;
-  int max_digit = 0;
-  for (int k = 0; k < 256; k++) {
-    int required_time = send_1byte(k);
+  unsigned int max_value = 0;
+  unsigned int max_digit = 0;
+  for (unsigned int k = 0; k < 256; k++) {
+    unsigned int required_time = send_1byte(k);
 
     // reset after sending
 
