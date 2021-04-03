@@ -63,14 +63,8 @@ int send_1byte(uint8_t key) {
 
   for (int i = 0; i < 16; i++) {
     targetSerial.write(zero);
-    delay(30);
+    delay(40);
   }
-
-  rst::off();
-  delay(20);
-  rst::on();
-
-  delay(100);
 
   // send key
   targetSerial.write(key);
@@ -80,6 +74,8 @@ int send_1byte(uint8_t key) {
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
+ 
+  
 
   // send query
   targetSerial.write(0x70);
@@ -90,6 +86,13 @@ int send_1byte(uint8_t key) {
   // calculate time
   int duration = stop_time - start_time;
   return duration;
+
+  delay(100);
+  rst::off();
+  delay(200);
+  rst::on();
+
+  delay(100);
 }
 
 void send_256_bytes() {
@@ -114,11 +117,11 @@ void send_256_bytes() {
 
 void reset_target() {
   mode::program();
-  delay(50);
+  delay(400);
   rst::off();
-  delay(20);
+  delay(200);
   rst::on();
-  delay(50);
+  delay(400);
   vdd::off();
 
   delay(100);
@@ -127,30 +130,32 @@ void reset_target() {
 void bootload_target() {
   //Začetek delovanja
   vdd::on();
+  delay(100);
   rst::on();
+  delay(100);
   mode::program();
 
   delay(100);
 
   //We send R8C to normall working.
   rst::off();
-  delay(20);
+  delay(200);
   rst::on();
-  delay(50);
+  delay(400);
   vdd::off();
 
-  delay(100);
+  delay(500);
 
   //We send R8C to bootloader.
   vdd::on();
-  delay(50);
+  delay(400);
   mode::bootloader();
-  delay(50);
+  delay(400);
   rst::off();
-  delay(20);
+  delay(200);
   rst::on();
 
-  delay(30);
+  delay(100);
 }
 
 
