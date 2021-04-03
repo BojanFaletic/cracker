@@ -64,8 +64,6 @@ void stop() {
 int send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
-  // Start interrupt on falling edge
-  INT::start();
 
   for (int i = 0; i < 16; i++) {
     targetSerial.write(zero);
@@ -79,7 +77,7 @@ int send_1byte(uint8_t key) {
   }
 
   // send key
-  
+
   targetSerial.write(zero);
   targetSerial.write(key);
   targetSerial.write(zero);
@@ -88,9 +86,12 @@ int send_1byte(uint8_t key) {
   targetSerial.write(zero);
   targetSerial.write(zero);
 
-  
+
   // send query
   targetSerial.write(0x70);
+
+  // Start interrupt on falling edge
+  INT::start();
 
   // wait for some time
   delay(200);
@@ -110,12 +111,12 @@ void send_256_bytes() {
     int required_time = send_1byte(k);
 
     // reset after sending
-    
+
     rst::off();
     delay(200);
     rst::on();
     delay(400);
-    
+
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" requred time: ");
