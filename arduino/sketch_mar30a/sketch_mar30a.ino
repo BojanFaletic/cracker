@@ -43,15 +43,18 @@ void setup() {
 }
 
 namespace INT {
+
+static unsigned int noOfTicks; 
+
 void stop();
 
 void startTimer1() {
+  // Set counter value to 0
+  TCNT1 = 0x00;
   // Reset TCCR1A options since Arduino likes to enable some of them. 
   TCCR1A = 0x00;
   // Set timer to normal mode and set prescaler to 1.
   TCCR1B = 0x01;
-  // Set counter value to 0
-  TCNT1 = 0x00;
 }
 
 void stopTimer1() {
@@ -72,6 +75,7 @@ void start() {
 }
 
 void stop() {
+  noOfTicks = getTimerTicks();
   stopTimer1();
   detachInterrupt(digitalPinToInterrupt(RX_1));
 }
@@ -108,7 +112,10 @@ int send_1byte(uint8_t key) {
   // Start interrupt on falling edge
   INT::start();
 
-  return getTimerTicks();
+  // Delay for max timeout (4ms)
+  delay(4);
+
+  return INT::noOfTicks;
 }
 
 void send_256_bytes() {
