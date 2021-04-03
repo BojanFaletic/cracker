@@ -43,31 +43,24 @@ void setup() {
 }
 
 namespace INT {
-static unsigned long start_time = 0;
-static unsigned long stop_time = 0;
-static unsigned long delta = 0;
-static unsigned long is_enable = 0;
 void stop();
-static void intermidiate();
 
-
-void startTimer1()
-{
+void startTimer1() {
   /*Set counter lower and upper byte to 0.*/
   TCNT1L = 0x00;
-  TCNT1H = 0x00;  
-  /*Set timer to normal mode and set prescaler to 1. This should start the timer?*/
+  TCNT1H = 0x00;
+  /*Set timer to normal mode and set prescaler to 1. This should start the
+   * timer?*/
   TCCR1B = 0x01;
 }
 
-void stopTimer1()
-{
-  /*Set timer to normal mode and set prescaler to 0. This should stop the timer?*/
-  TCCR1B = 0x01;
+void stopTimer1() {
+  /*Set timer to normal mode and set prescaler to 0. This should stop the
+   * timer?*/
+  TCCR1B = 0x00;
 }
 
-unsigned int getTimerTicks()
-{
+unsigned int getTimerTicks() {
   unsigned int ticks = 0;
   /*Get upper and lower counter byte to ticks.*/
   ticks = TCNT1H << 8;
@@ -76,28 +69,15 @@ unsigned int getTimerTicks()
 }
 
 void start() {
-  is_enable = 1;
-  attachInterrupt(digitalPinToInterrupt(RX_1), INT::intermidiate, FALLING);
+  attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
   startTimer1();
-  //start_time = millis();
 }
 
-static void intermidiate() {
-  stop_time = millis();
-  Serial.print("Entering interrupt:: start_time: ");
-  Serial.print(start_time);
-  Serial.print(" stop_time: ");
-  Serial.print(stop_time);
-  Serial.print(" delta: ");
-  Serial.println(stop_time - start_time);
-  stopTimer1();
-  //stop();
-}
 void stop() {
-  is_enable = 0;
-  delta = (unsigned long)getTimerTicks();//stop_time - start_time;
+  stopTimer1();
   detachInterrupt(digitalPinToInterrupt(RX_1));
 }
+
 } // namespace INT
 
 int send_1byte(uint8_t key) {
@@ -132,13 +112,6 @@ int send_1byte(uint8_t key) {
 
   // wait for some time
   delay(200);
-  if (INT::is_enable) {
-    Serial.println("Warning delta not arrived!");
-    INT::stop();
-  }
-
-  delay(100);
-  return INT::delta;
 }
 
 void send_256_bytes() {
@@ -189,7 +162,7 @@ void bootload_target() {
   delay(400);
 
   // We send R8C to normall working.
-  
+
   rst::off();
   delay(300);
   rst::on();
