@@ -71,6 +71,12 @@ int send_1byte(uint8_t key) {
     targetSerial.write(zero);
     delay(40);
   }
+  
+  // send header
+  const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
+  for (uint8_t el : header) {
+    targetSerial.write(el);
+  }
 
   // send key
   targetSerial.write(key);
