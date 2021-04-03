@@ -60,12 +60,11 @@ void stopTimer1() {
   TCCR1B = 0x00;
 }
 
+bool isTimerActive() { return TCCR1B & 0x01; }
+
 unsigned int getTimerTicks() {
-  unsigned int ticks = 0;
   /*Get upper and lower counter byte to ticks.*/
-  ticks = TCNT1H << 8;
-  ticks = TCNT1L;
-  return ticks;
+  return TCNT1;
 }
 
 void start() {
@@ -111,7 +110,13 @@ int send_1byte(uint8_t key) {
   INT::start();
 
   // wait for some time
-  delay(200);
+  delay(4);
+  if (INT::isTimerActive()){
+    INT::stop();
+    Serial.println("Warning: No reply from RS8");
+    return -1;
+  }
+
   return INT::getTimerTicks();
 }
 
