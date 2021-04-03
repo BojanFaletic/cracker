@@ -43,18 +43,30 @@ void setup() {
 }
 
 namespace INT {
-static unsigned long start_time;
-static unsigned long delta;
-static unsigned long is_enable;
+static unsigned long start_time = 0;
+static unsigned long stop_time = 0;
+static unsigned long delta = 0;
+static unsigned long is_enable = 0;
 void stop();
+static void intermidiate();
 
 void start() {
   is_enable = 1;
-  attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
+  attachInterrupt(digitalPinToInterrupt(RX_1), INT::intermidiate, FALLING);
   start_time = millis();
 }
+
+static void intermidiate() {
+  stop_time = millis();
+  Serial.print("Entering interrupt:: start_time: ");
+  Serial.print(start_time);
+  Serial.print(" stop_time: ");
+  Serial.print(stop_time);
+  Serial.print(" delta: ");
+  Serial.println(stop_time - start_time);
+  stop();
+}
 void stop() {
-  unsigned long stop_time = millis();
   is_enable = 0;
   delta = stop_time - start_time;
   detachInterrupt(digitalPinToInterrupt(RX_1));
@@ -63,7 +75,6 @@ void stop() {
 
 int send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
-
 
   for (int i = 0; i < 16; i++) {
     targetSerial.write(zero);
@@ -85,7 +96,6 @@ int send_1byte(uint8_t key) {
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
-
 
   // send query
   targetSerial.write(0x70);
