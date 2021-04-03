@@ -79,14 +79,16 @@ int send_1byte(uint8_t key) {
   }
 
   // send key
+  
+  targetSerial.write(zero);
   targetSerial.write(key);
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
-  targetSerial.write(zero);
 
+  
   // send query
   targetSerial.write(0x70);
 
@@ -108,11 +110,12 @@ void send_256_bytes() {
     int required_time = send_1byte(k);
 
     // reset after sending
-    delay(100);
+    
     rst::off();
     delay(200);
     rst::on();
-
+    delay(400);
+    
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" requred time: ");
@@ -136,7 +139,7 @@ void reset_target() {
   delay(400);
   vdd::off();
 
-  delay(100);
+  delay(400);
 }
 
 void bootload_target() {
@@ -146,28 +149,28 @@ void bootload_target() {
   rst::on();
   delay(100);
   mode::program();
-
   delay(100);
 
   // We send R8C to normall working.
+  delay(300);
   rst::off();
   delay(200);
   rst::on();
   delay(400);
   vdd::off();
 
-  delay(500);
+  delay(400);
 
   // We send R8C to bootloader.
   vdd::on();
   delay(400);
   mode::bootloader();
-  delay(400);
+  delay(200);
   rst::off();
   delay(200);
   rst::on();
 
-  delay(100);
+  delay(400);
 }
 
 void loop() {
