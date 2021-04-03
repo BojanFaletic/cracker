@@ -106,16 +106,9 @@ int send_1byte(uint8_t key) {
   targetSerial.write(0x70);
 
   // Start interrupt on falling edge
-  // INT::start();
+  INT::start();
 
-  // wait for some time
-  unsigned long counter = 0;
-  auto fast_read = [] { return PIND & (1 << 2) == 0; };
-
-  while (!fast_read()) {
-    counter++;
-  }
-  return counter;
+  return getTimerTicks();
 }
 
 void send_256_bytes() {
