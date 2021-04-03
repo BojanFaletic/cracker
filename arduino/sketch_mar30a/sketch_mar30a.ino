@@ -50,10 +50,36 @@ static unsigned long is_enable = 0;
 void stop();
 static void intermidiate();
 
+
+void startTimer1()
+{
+  /*Set counter lower and upper byte to 0.*/
+  TCNT1L = 0x00;
+  TCNT1H = 0x00;  
+  /*Set timer to normal mode and set prescaler to 1. This should start the timer?*/
+  TCCR1B = 0x01;
+}
+
+void stopTimer1()
+{
+  /*Set timer to normal mode and set prescaler to 0. This should stop the timer?*/
+  TCCR1B = 0x01;
+}
+
+unsigned int getTimerTicks()
+{
+  unsigned int ticks = 0;
+  /*Get upper and lower counter byte to ticks.*/
+  ticks = TCNT1H << 8;
+  ticks = TCNT1L;
+  return ticks;
+}
+
 void start() {
   is_enable = 1;
   attachInterrupt(digitalPinToInterrupt(RX_1), INT::intermidiate, FALLING);
-  start_time = millis();
+  startTimer1();
+  //start_time = millis();
 }
 
 static void intermidiate() {
@@ -64,11 +90,12 @@ static void intermidiate() {
   Serial.print(stop_time);
   Serial.print(" delta: ");
   Serial.println(stop_time - start_time);
-  stop();
+  stopTimer1();
+  //stop();
 }
 void stop() {
   is_enable = 0;
-  delta = stop_time - start_time;
+  delta = (unsigned long)getTimerTicks();//stop_time - start_time;
   detachInterrupt(digitalPinToInterrupt(RX_1));
 }
 } // namespace INT
