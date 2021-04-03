@@ -47,11 +47,10 @@ void stop();
 
 void startTimer1() {
   /*Set counter lower and upper byte to 0.*/
-  TCNT1L = 0x00;
-  TCNT1H = 0x00;
   /*Set timer to normal mode and set prescaler to 1. This should start the
    * timer?*/
   TCCR1B = 0x01;
+  TCNT1 = 0x00;
 }
 
 void stopTimer1() {
