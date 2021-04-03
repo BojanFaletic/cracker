@@ -89,8 +89,8 @@ int send_1byte(uint8_t key) {
 
   // send key
 
-  targetSerial.write(zero);
   targetSerial.write(key);
+  targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
@@ -149,23 +149,22 @@ void reset_target() {
   rst::on();
   delay(400);
   vdd::off();
-
   delay(400);
 }
 
 void bootload_target() {
   // Začetek delovanja
   vdd::on();
-  delay(100);
+  delay(400);
   rst::on();
-  delay(100);
+  delay(400);
   mode::program();
-  delay(100);
+  delay(400);
 
   // We send R8C to normall working.
-  delay(300);
+  
   rst::off();
-  delay(200);
+  delay(300);
   rst::on();
   delay(400);
   vdd::off();
@@ -176,7 +175,7 @@ void bootload_target() {
   vdd::on();
   delay(400);
   mode::bootloader();
-  delay(200);
+  delay(400);
   rst::off();
   delay(200);
   rst::on();
@@ -194,6 +193,7 @@ void loop() {
   }
 
   Serial.println("Start of process");
+  delay(400);
 
   bootload_target();
   send_256_bytes();
