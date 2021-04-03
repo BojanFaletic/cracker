@@ -43,9 +43,9 @@ void setup() {
 }
 
 namespace INT {
-static int start_time;
-static int delta;
-static int is_enable;
+static unsigned long start_time;
+static unsigned long delta;
+static unsigned long is_enable;
 void stop();
 
 void start() {
@@ -54,7 +54,7 @@ void start() {
   start_time = millis();
 }
 void stop() {
-  int stop_time = millis();
+  unsigned long stop_time = millis();
   is_enable = 0;
   delta = stop_time - start_time;
   detachInterrupt(digitalPinToInterrupt(RX_1));
@@ -71,7 +71,7 @@ int send_1byte(uint8_t key) {
     targetSerial.write(zero);
     delay(40);
   }
-  
+
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
