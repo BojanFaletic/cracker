@@ -8,7 +8,7 @@ const int RX_1 = 3;
 const int TX_1 = 9;
 const int BLANK = 12;
 
-/*My*/
+/*My */
 const int BUTTON_PIN = 11;
 
 SoftwareSerial targetSerial(BLANK, TX_1);
