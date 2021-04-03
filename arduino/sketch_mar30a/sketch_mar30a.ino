@@ -106,17 +106,14 @@ int send_1byte(uint8_t key) {
   targetSerial.write(0x70);
 
   // Start interrupt on falling edge
-  INT::start();
+  //INT::start();
 
   // wait for some time
-  delay(4);
-  if (INT::isTimerActive()){
-    INT::stop();
-    Serial.println("Warning: No reply from RS8");
-    return -1;
+  unsigned long counter = 0;
+  while (digitalRead(RX_1) == 1){
+    counter++;
   }
-
-  return INT::getTimerTicks();
+  return counter;
 }
 
 void send_256_bytes() {
