@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <stdint.h>
 
 // HW
 const int MODE = 8;
@@ -16,18 +17,40 @@ SoftwareSerial targetSerial(BLANK, TX_1);
 constexpr uint8_t NOT(uint8_t x) { return x ^ 1; }
 
 namespace vdd {
-void on() { digitalWrite(VDD_SWICH, 0); }
-void off() { digitalWrite(VDD_SWICH, 1); }
+void on() {
+  digiralWrite(RESET, rst::rst_state);
+  digiralWrite(MODE, mode::mode_state);
+  digitalWrite(VDD_SWICH, 0);
+}
+void off() {
+  digiralWrite(RESET, rst::rst_state);
+  digiralWrite(MODE, mode::mode_state);
+  digitalWrite(VDD_SWICH, 1);
+}
 } // namespace vdd
 
 namespace rst {
-void off() { digitalWrite(RESET, 1); }
-void on() { digitalWrite(RESET, 0); }
+static uint8_t rst_state = 1;
+void off() {
+  digitalWrite(RESET, 1);
+  rst_state = 1;
+}
+void on() {
+  digitalWrite(RESET, 0);
+  rst_state = 0;
+}
 } // namespace rst
 
 namespace mode {
-void bootloader() { digitalWrite(MODE, 1); }
-void program() { digitalWrite(MODE, 0); }
+static uint8_t mode_state = 0;
+void bootloader() {
+  digitalWrite(MODE, 1);
+  mode_state = 1;
+}
+void program() {
+  digitalWrite(MODE, 0);
+  mode_state = 0;
+}
 } // namespace mode
 
 void setup() {
@@ -70,9 +93,10 @@ unsigned int getTimerTicks() {
 }
 
 void start() {
-  //attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
+  // attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
   startTimer1();
-  while (digitalRead(RX_1)); 
+  while (digitalRead(RX_1))
+    ;
   stop();
 }
 
@@ -133,7 +157,6 @@ void send_256_bytes() {
     delay(200);
     rst::on();
     delay(200);
-    
 
     Serial.print("Sending: ");
     Serial.print(k);
