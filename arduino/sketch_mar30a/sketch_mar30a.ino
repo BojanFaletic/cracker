@@ -16,32 +16,42 @@ SoftwareSerial targetSerial(BLANK, TX_1);
 
 constexpr uint8_t NOT(uint8_t x) { return x ^ 1; }
 
-
 namespace rst {
+static uint8_t rst_prev = 1;
 void off() {
   digitalWrite(RESET, 1);
+  rst_prev = 1;
 }
 void on() {
   digitalWrite(RESET, 0);
+  rst_prev = 0;
 }
 } // namespace rst
 
 namespace mode {
+static uint8_t mode_prev = 1;
 void bootloader() {
   digitalWrite(MODE, 1);
+  mode_prev = 1;
 }
 void program() {
   digitalWrite(MODE, 0);
+  mode_prev = 0;
 }
 } // namespace mode
 
 namespace vdd {
 void on() {
+  mode::bootloader();
   digitalWrite(TX_1, 1);
+  digitalWrite(MODE, mode::mode_prev);
+  digitalWrite(RST, rst::rst_prev);
   digitalWrite(VDD_SWICH, 0);
 }
 void off() {
   digitalWrite(TX_1, 0);
+  digitalWrite(MODE, 1);
+  digitalWrite(RESET, 1);
   digitalWrite(VDD_SWICH, 1);
 }
 } // namespace vdd
