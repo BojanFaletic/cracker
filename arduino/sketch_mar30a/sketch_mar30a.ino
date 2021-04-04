@@ -43,13 +43,13 @@ void program() {
 
 namespace vdd {
 void on() {
-  digiralWrite(RESET, rst::rst_state);
-  digiralWrite(MODE, mode::mode_state);
+  digitalWrite(RESET, rst::rst_state);
+  digitalWrite(MODE, mode::mode_state);
   digitalWrite(VDD_SWICH, 0);
 }
 void off() {
-  digiralWrite(RESET, rst::rst_state);
-  digiralWrite(MODE, mode::mode_state);
+  rst::off();
+  mode::program();
   digitalWrite(VDD_SWICH, 1);
 }
 } // namespace vdd
