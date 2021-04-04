@@ -1,12 +1,7 @@
-.vscode
-__pycache__
-
-experiments
-
-tree
-data
-checkpoint
-
-program.log
-.*
-.csv
+# Ignore all files except select fiew
+*
+!cracker
+!doc
+!arduino
+!*.py
+!*.txt
