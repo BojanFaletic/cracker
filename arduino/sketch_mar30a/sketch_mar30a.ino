@@ -70,13 +70,15 @@ unsigned int getTimerTicks() {
 }
 
 void start() {
-  attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
+  //attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
   startTimer1();
+  while (digitalRead(RX_1)); 
+  stop();
 }
 
 void stop() {
-  noOfTicks = getTimerTicks();
   stopTimer1();
+  noOfTicks = getTimerTicks();
   detachInterrupt(digitalPinToInterrupt(RX_1));
 }
 
@@ -126,10 +128,12 @@ void send_256_bytes() {
 
     // reset after sending
 
+    delay(200);
     rst::off();
     delay(200);
     rst::on();
-    delay(400);
+    delay(200);
+    
 
     Serial.print("Sending: ");
     Serial.print(k);
@@ -147,11 +151,11 @@ void send_256_bytes() {
 
 void reset_target() {
   mode::program();
-  delay(400);
+  delay(300);
   rst::off();
-  delay(200);
+  delay(300);
   rst::on();
-  delay(400);
+  delay(300);
   vdd::off();
   delay(400);
 }
@@ -159,32 +163,31 @@ void reset_target() {
 void bootload_target() {
   // Začetek delovanja
   vdd::on();
-  delay(400);
+  delay(300);
   rst::on();
-  delay(400);
+  delay(300);
   mode::program();
-  delay(400);
+  delay(300);
 
   // We send R8C to normall working.
 
   rst::off();
   delay(300);
   rst::on();
-  delay(400);
+  delay(500);
   vdd::off();
 
-  delay(400);
+  delay(1000);
 
   // We send R8C to bootloader.
   vdd::on();
-  delay(400);
+  delay(300);
   mode::bootloader();
-  delay(400);
+  delay(300);
   rst::off();
-  delay(200);
+  delay(300);
   rst::on();
-
-  delay(400);
+  delay(300);
 }
 
 void loop() {
