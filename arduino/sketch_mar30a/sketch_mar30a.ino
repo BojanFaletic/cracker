@@ -18,40 +18,30 @@ constexpr uint8_t NOT(uint8_t x) { return x ^ 1; }
 
 
 namespace rst {
-static uint8_t rst_state = 1;
 void off() {
   digitalWrite(RESET, 1);
-  rst_state = 1;
 }
 void on() {
   digitalWrite(RESET, 0);
-  rst_state = 0;
 }
 } // namespace rst
 
 namespace mode {
-static uint8_t mode_state = 0;
 void bootloader() {
   digitalWrite(MODE, 1);
-  mode_state = 1;
 }
 void program() {
   digitalWrite(MODE, 0);
-  mode_state = 0;
 }
 } // namespace mode
 
 namespace vdd {
 void on() {
   digitalWrite(TX_1, 1);
-  digitalWrite(RESET, rst::rst_state);
-  digitalWrite(MODE, mode::mode_state);
   digitalWrite(VDD_SWICH, 0);
 }
 void off() {
   digitalWrite(TX_1, 0);
-  rst::off();
-  mode::program();
   digitalWrite(VDD_SWICH, 1);
 }
 } // namespace vdd
