@@ -16,18 +16,6 @@ SoftwareSerial targetSerial(BLANK, TX_1);
 
 constexpr uint8_t NOT(uint8_t x) { return x ^ 1; }
 
-namespace vdd {
-void on() {
-  digiralWrite(RESET, rst::rst_state);
-  digiralWrite(MODE, mode::mode_state);
-  digitalWrite(VDD_SWICH, 0);
-}
-void off() {
-  digiralWrite(RESET, rst::rst_state);
-  digiralWrite(MODE, mode::mode_state);
-  digitalWrite(VDD_SWICH, 1);
-}
-} // namespace vdd
 
 namespace rst {
 static uint8_t rst_state = 1;
@@ -52,6 +40,19 @@ void program() {
   mode_state = 0;
 }
 } // namespace mode
+
+namespace vdd {
+void on() {
+  digiralWrite(RESET, rst::rst_state);
+  digiralWrite(MODE, mode::mode_state);
+  digitalWrite(VDD_SWICH, 0);
+}
+void off() {
+  digiralWrite(RESET, rst::rst_state);
+  digiralWrite(MODE, mode::mode_state);
+  digitalWrite(VDD_SWICH, 1);
+}
+} // namespace vdd
 
 void setup() {
   // put your setup code here, to run once:
