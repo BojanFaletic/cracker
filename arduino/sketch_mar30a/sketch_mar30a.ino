@@ -175,7 +175,7 @@ uint16_t send_1byte(uint8_t key) {
 
   for (uint16_t i = 0; i < 16; i++) {
     targetSerial.write(zero);
-    delay(40);
+    DELAY::ms(40);
   }
 
   // send header
@@ -201,7 +201,7 @@ uint16_t send_1byte(uint8_t key) {
   INT::start();
 
   // Delay for max timeout (4ms)
-  delay(4);
+  DELAY::ms(4);
 
   return INT::noOfTicks;
 }
@@ -214,11 +214,11 @@ void send_256_bytes() {
 
     // reset after sending
 
-    delay(200);
+    DELAY::ms(200);
     RST::off();
-    delay(200);
+    DELAY::ms(200);
     RST::on();
-    delay(200);
+    DELAY::ms(200);
 
     Serial.print("Sending: ");
     Serial.print(k);
@@ -236,43 +236,43 @@ void send_256_bytes() {
 
 void reset_target() {
   MODE::program();
-  delay(300);
+  DELAY::ms(300);
   RST::off();
-  delay(300);
+  DELAY::ms(300);
   RST::on();
-  delay(300);
+  DELAY::ms(300);
   VDD::off();
-  delay(400);
+  DELAY::ms(400);
 }
 
 void bootload_target() {
   // Start
   VDD::on();
-  delay(300);
+  DELAY::ms(300);
   VDD::on();
-  delay(300);
+  DELAY::ms(300);
   MODE::program();
-  delay(300);
+  DELAY::ms(300);
 
   // We send R8C to normall working.
 
   RST::off();
-  delay(300);
+  DELAY::ms(300);
   RST::on();
-  delay(500);
+  DELAY::ms(500);
   VDD::off();
 
-  delay(1000);
+  DELAY::ms(1000);
 
   // We send R8C to bootloader.
   VDD::on();
-  delay(300);
+  DELAY::ms(300);
   MODE::bootloader();
-  delay(300);
+  DELAY::ms(300);
   RST::off();
-  delay(300);
+  DELAY::ms(300);
   RST::on();
-  delay(300);
+  DELAY::ms(300);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -298,7 +298,7 @@ void loop() {
     ;
 
   Serial.println("Start of process");
-  delay(400);
+  DELAY::ms(400);
 
   bootload_target();
   send_256_bytes();
