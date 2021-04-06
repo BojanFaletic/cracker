@@ -1,5 +1,3 @@
-
-
 #include <SoftwareSerial.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -8,58 +6,76 @@
 typedef uint8_t u8;
 typedef uint32_t u32;
 
-// HW
-const int MODE = 8;
-const int RESET = 4;
-const int VDD_SWICH = 5;
-const int RX_1 = 3;
-const int TX_1 = 9;
-const int BLANK = 12;
-const int BUTTON_PIN = 11;
+#ifdef DEBUG
+#define digitalWrite(x, y) (1)
+#define pinMode(x, y) (1)
+#define digitalRead(x) (1)
+#endif
 
-SoftwareSerial targetSerial(BLANK, TX_1);
+//////////////////////////////////////////////////
+////////////////// Config parameters /////////////
+//////////////////////////////////////////////////
 
-constexpr uint8_t NOT(uint8_t x) { return x ^ 1; }
+namespace HW {
+// Harware definitions
+constexpr u8 MODE = 8;
+constexpr u8 RESET = 4;
+constexpr u8 VDD_SWICH = 5;
+constexpr u8 RX_1 = 3;
+constexpr u8 TX_1 = 9;
+constexpr u8 BLANK = 12;
+constexpr u8 BUTTON = 11;
+} // namespace HW
 
-namespace rst {
-static uint8_t rst_prev = 1;
+namespace UART {
+// Baudrate for uart
+constexpr u16 PC_BAUD = 9600;
+constexpr u16 RNS8_BAUD = 9600;
+} // namespace UART
+
+//////////////////////////////////////////////////
+
+namespace RST {
+// Reset pin
+static u8 rst_prev = 1;
 void off() {
-  digitalWrite(RESET, 1);
+  digitalWrite(HW::RESET, 1);
   rst_prev = 1;
 }
 void on() {
-  digitalWrite(RESET, 0);
+  digitalWrite(HW::RESET, 0);
   rst_prev = 0;
 }
-} // namespace rst
+} // namespace RST
 
-namespace mode {
+namespace MODE {
+// Mode pin
 static uint8_t mode_prev = 1;
 void bootloader() {
-  digitalWrite(MODE, 1);
+  digitalWrite(HW::MODE, 1);
   mode_prev = 1;
 }
 void program() {
-  digitalWrite(MODE, 0);
+  digitalWrite(HW::MODE, 0);
   mode_prev = 0;
 }
-} // namespace mode
+} // namespace MODE
 
-namespace vdd {
+namespace VDD {
 void on() {
-  mode::bootloader();
-  digitalWrite(TX_1, 1);
-  digitalWrite(MODE, mode::mode_prev);
-  digitalWrite(RESET, rst::rst_prev);
-  digitalWrite(VDD_SWICH, 0);
+  MODE::bootloader();
+  digitalWrite(HW::TX_1, HIGH);
+  digitalWrite(HW::MODE, MODE::mode_prev);
+  digitalWrite(HW::RESET, RST::rst_prev);
+  digitalWrite(HW::VDD_SWICH, LOW);
 }
 void off() {
-  digitalWrite(TX_1, 0);
-  digitalWrite(MODE, 1);
-  digitalWrite(RESET, 1);
-  digitalWrite(VDD_SWICH, 1);
+  digitalWrite(HW::TX_1, LOW);
+  digitalWrite(HW::MODE, HIGH);
+  digitalWrite(HW::RESET, HIGH);
+  digitalWrite(HW::VDD_SWICH, HIGH);
 }
-} // namespace vdd
+} // namespace VDD
 
 namespace DELAY {
 static u32 counter_ov_cnt;
@@ -119,15 +135,13 @@ void s(u8 duration_s) {
   ms(d_ms);
 }
 
-} // namespace DELAY uses timer2
+} // namespace DELAY
 
 // timer 2 overflow
 ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt += (1 << 8); }
 
 namespace INT {
-
-static unsigned int noOfTicks;
-
+static u16 noOfTicks;
 void stop();
 
 void startTimer1() {
@@ -139,22 +153,13 @@ void startTimer1() {
   TCCR1B = 0x01;
 }
 
-void stopTimer1() {
-  // Set timer to normal mode and set prescaler to 0.
-  TCCR1B = 0x00;
-}
+void stopTimer1() { TCCR1B = 0x00; }
 
-bool isTimerActive() { return TCCR1B & 0x01; }
-
-unsigned int getTimerTicks() {
-  // Get upper and lower counter byte to ticks.
-  return TCNT1;
-}
+unsigned int getTimerTicks() { return TCNT1; }
 
 void start() {
-  // attachInterrupt(digitalPinToInterrupt(RX_1), INT::stop, FALLING);
   startTimer1();
-  while (digitalRead(RX_1))
+  while (digitalRead(HW::RX_1))
     ;
   stop();
 }
@@ -162,11 +167,11 @@ void start() {
 void stop() {
   stopTimer1();
   noOfTicks = getTimerTicks();
-  detachInterrupt(digitalPinToInterrupt(RX_1));
 }
 
 } // namespace INT
 
+SoftwareSerial targetSerial(HW::BLANK, HW::TX_1);
 unsigned int send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
@@ -212,14 +217,14 @@ void send_256_bytes() {
     // reset after sending
 
     delay(200);
-    rst::off();
+    RST::off();
     delay(200);
-    rst::on();
+    RST::on();
     delay(200);
 
     Serial.print("Sending: ");
     Serial.print(k);
-    Serial.print(" requred time: ");
+    Serial.print(" required time: ");
     Serial.println(required_time);
 
     if (max_value < required_time) {
@@ -232,43 +237,43 @@ void send_256_bytes() {
 }
 
 void reset_target() {
-  mode::program();
+  MODE::program();
   delay(300);
-  rst::off();
+  RST::off();
   delay(300);
-  rst::on();
+  RST::on();
   delay(300);
-  vdd::off();
+  VDD::off();
   delay(400);
 }
 
 void bootload_target() {
-  // Začetek delovanja
-  vdd::on();
+  // Start
+  VDD::on();
   delay(300);
-  rst::on();
+  VDD::on();
   delay(300);
-  mode::program();
+  MODE::program();
   delay(300);
 
   // We send R8C to normall working.
 
-  rst::off();
+  RST::off();
   delay(300);
-  rst::on();
+  RST::on();
   delay(500);
-  vdd::off();
+  VDD::off();
 
   delay(1000);
 
   // We send R8C to bootloader.
-  vdd::on();
+  VDD::on();
   delay(300);
-  mode::bootloader();
+  MODE::bootloader();
   delay(300);
-  rst::off();
+  RST::off();
   delay(300);
-  rst::on();
+  RST::on();
   delay(300);
 }
 
@@ -277,21 +282,21 @@ void bootload_target() {
 ////////////////////////////////////////////////////////////////////
 
 void setup() {
-  Serial.begin(115200);
-  targetSerial.begin(9600);
+  Serial.begin(UART::PC_BAUD);
+  targetSerial.begin(UART::RNS8_BAUD);
   DELAY::init();
 
-  pinMode(MODE, OUTPUT);
-  pinMode(RESET, OUTPUT);
-  pinMode(VDD_SWICH, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT);
-  pinMode(RX_1, INPUT_PULLUP);
+  pinMode(HW::MODE, OUTPUT);
+  pinMode(HW::RESET, OUTPUT);
+  pinMode(HW::VDD_SWICH, OUTPUT);
+  pinMode(HW::BUTTON, INPUT);
+  pinMode(HW::RX_1, INPUT_PULLUP);
 }
 
 void loop() {
   Serial.println("Press button to start cracking process.");
 
-  while (digitalRead(BUTTON_PIN) == HIGH)
+  while (digitalRead(HW::BUTTON) == HIGH)
     ;
 
   Serial.println("Start of process");
