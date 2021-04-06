@@ -1,5 +1,12 @@
+
+
 #include <SoftwareSerial.h>
+#include <avr/interrupt.h>
+#include <avr/io.h>
 #include <stdint.h>
+
+typedef uint8_t u8;
+typedef uint32_t u32;
 
 // HW
 const int MODE = 8;
@@ -8,8 +15,6 @@ const int VDD_SWICH = 5;
 const int RX_1 = 3;
 const int TX_1 = 9;
 const int BLANK = 12;
-
-/*My */
 const int BUTTON_PIN = 11;
 
 SoftwareSerial targetSerial(BLANK, TX_1);
@@ -45,7 +50,7 @@ void on() {
   mode::bootloader();
   digitalWrite(TX_1, 1);
   digitalWrite(MODE, mode::mode_prev);
-  digitalWrite(RST, rst::rst_prev);
+  digitalWrite(RESET, rst::rst_prev);
   digitalWrite(VDD_SWICH, 0);
 }
 void off() {
@@ -56,17 +61,68 @@ void off() {
 }
 } // namespace vdd
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  targetSerial.begin(9600);
+namespace DELAY {
+static u32 counter_ov_cnt;
+constexpr u8 CLK_DIV_1 = 1 << 0;
 
-  pinMode(MODE, OUTPUT);
-  pinMode(RESET, OUTPUT);
-  pinMode(VDD_SWICH, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT);
-  pinMode(RX_1, INPUT_PULLUP);
+void _start() { TCCR2B = CLK_DIV_1; }
+void _stop() { TCCR2B = 0x00; }
+void _clear() {
+  TCNT2 = 0x00;
+  counter_ov_cnt = 0;
 }
+void _overflow_int() { TIMSK2 = 0x01; }
+
+void init() {
+  _stop();
+  _clear();
+  _overflow_int();
+}
+
+void _delay(u32 ticks) {
+  counter_ov_cnt = 0;
+  _clear();
+  _start();
+  auto cnt_ticks = []() { return counter_ov_cnt | TCNT2; };
+  while (cnt_ticks() < ticks)
+    ;
+  _stop();
+}
+
+void ns(u32 duration_ns) {
+  u32 ticks = duration_ns / F_CPU;
+  _delay(ticks);
+}
+
+void us(u32 duration_us) {
+  constexpr u32 us_to_ns = 1000;
+  constexpr u32 max_value = static_cast<u32>(-1);
+  u32 d_ns =
+      (duration_us < max_value - us_to_ns) ? duration_us * us_to_ns : max_value;
+  ns(d_ns);
+}
+
+void ms(u16 duration_ms) {
+  constexpr u32 ms_to_us = 1000;
+  constexpr u32 max_value = static_cast<u32>(-1);
+  u32 duration = static_cast<u32>(duration_ms);
+  u32 d_us =
+      (duration < max_value - ms_to_us) ? duration * ms_to_us : max_value;
+  us(d_us);
+}
+
+void s(u8 duration_s) {
+  constexpr u32 s_to_ms = 1000;
+  constexpr u32 max_value = static_cast<u32>(-1);
+  u32 duration = static_cast<u32>(duration_s);
+  u32 d_ms = (duration < max_value - s_to_ms) ? duration * s_to_ms : max_value;
+  ms(d_ms);
+}
+
+} // namespace DELAY uses timer2
+
+// timer 2 overflow
+ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt += (1 << 8); }
 
 namespace INT {
 
@@ -216,14 +272,27 @@ void bootload_target() {
   delay(300);
 }
 
+////////////////////////////////////////////////////////////////////
+/////////////////////////// ARDUINO ////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+void setup() {
+  Serial.begin(115200);
+  targetSerial.begin(9600);
+  DELAY::init();
+
+  pinMode(MODE, OUTPUT);
+  pinMode(RESET, OUTPUT);
+  pinMode(VDD_SWICH, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(RX_1, INPUT_PULLUP);
+}
+
 void loop() {
-  // put your main code here, to run repeatedly:
   Serial.println("Press button to start cracking process.");
 
-  // my, no code because no code is processed.
-  while (digitalRead(BUTTON_PIN) == HIGH) {
-    // Naredi nič.
-  }
+  while (digitalRead(BUTTON_PIN) == HIGH)
+    ;
 
   Serial.println("Start of process");
   delay(400);
