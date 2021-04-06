@@ -14,23 +14,14 @@
 
 #define BAUDRATE 9600
 
-#define set_pin(port, pin) port |= (1 << pin);
-#define clear_pin(port, pin) port &= ~(1 << pin);
-
 void wait_for_baud() {
   constexpr uint16_t delay = 1e6 / BAUDRATE;
   _delay_us(delay);
 }
 
-void set() {
-  // enable pull up resistor
-  set_pin(SOFT_PORT, SOFT_TX_PIN);
-}
+void set() { PORTB |= (1 << PINB1); }
 
-void clear() {
-  // disable pullup resistor
-  clear_pin(SOFT_PORT, SOFT_TX_PIN);
-}
+void clear() { PORTB &= (1 << PINB1); }
 
 void send_bit(bool value) {
   if (value) {
@@ -43,9 +34,9 @@ void send_bit(bool value) {
 
 void init_tx() {
   // set as high impedance
-  set_pin(SOFT_DDR_PORT, SOFT_TX_PIN);
+  DDRB |= (1 << PINB1);
   // input with pullup
-  set_pin(SOFT_PORT, SOFT_TX_PIN);
+  PORTB |= (1 << PINB1);
 }
 
 void softuart_putchar(char ch) {
@@ -53,7 +44,7 @@ void softuart_putchar(char ch) {
     // start bit
     wait_for_baud();
     if (i == 0) {
-      clear_pin(SOFT_PORT, SOFT_TX_PIN);
+      clear();
       continue;
     }
 
@@ -66,6 +57,6 @@ void softuart_putchar(char ch) {
     }
 
     // stop bit
-    set_pin(SOFT_PORT, SOFT_TX_PIN);
+    set();
   }
 }
