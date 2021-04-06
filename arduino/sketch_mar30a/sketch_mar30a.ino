@@ -3,9 +3,6 @@
 #include <avr/io.h>
 #include <stdint.h>
 
-typedef uint8_t u8;
-typedef uint32_t u32;
-
 #ifdef DEBUG
 #define digitalWrite(x, y) (1)
 #define pinMode(x, y) (1)
@@ -18,26 +15,26 @@ typedef uint32_t u32;
 
 namespace HW {
 // Harware definitions
-constexpr u8 MODE = 8;
-constexpr u8 RESET = 4;
-constexpr u8 VDD_SWICH = 5;
-constexpr u8 RX_1 = 3;
-constexpr u8 TX_1 = 9;
-constexpr u8 BLANK = 12;
-constexpr u8 BUTTON = 11;
+constexpr uint8_t MODE = 8;
+constexpr uint8_t RESET = 4;
+constexpr uint8_t VDD_SWICH = 5;
+constexpr uint8_t RX_1 = 3;
+constexpr uint8_t TX_1 = 9;
+constexpr uint8_t BLANK = 12;
+constexpr uint8_t BUTTON = 11;
 } // namespace HW
 
 namespace UART {
 // Baudrate for uart
-constexpr u16 PC_BAUD = 9600;
-constexpr u16 RNS8_BAUD = 9600;
+constexpr uint16_t PC_BAUD = 9600;
+constexpr uint16_t RNS8_BAUD = 9600;
 } // namespace UART
 
 //////////////////////////////////////////////////
 
 namespace RST {
 // Reset pin
-static u8 rst_prev = 1;
+static uint8_t rst_prev = 1;
 void off() {
   digitalWrite(HW::RESET, 1);
   rst_prev = 1;
@@ -78,8 +75,8 @@ void off() {
 } // namespace VDD
 
 namespace DELAY {
-static u32 counter_ov_cnt;
-constexpr u8 CLK_DIV_1 = 1 << 0;
+static uint32_t counter_ov_cnt;
+constexpr uint8_t CLK_DIV_1 = 1 << 0;
 
 void _start() { TCCR2B = CLK_DIV_1; }
 void _stop() { TCCR2B = 0x00; }
@@ -95,7 +92,7 @@ void init() {
   _overflow_int();
 }
 
-void _delay(u32 ticks) {
+void _delay(uint32_t ticks) {
   counter_ov_cnt = 0;
   _clear();
   _start();
@@ -105,33 +102,34 @@ void _delay(u32 ticks) {
   _stop();
 }
 
-void ns(u32 duration_ns) {
-  u32 ticks = duration_ns / F_CPU;
+void ns(uint32_t duration_ns) {
+  uint32_t ticks = duration_ns / F_CPU;
   _delay(ticks);
 }
 
-void us(u32 duration_us) {
-  constexpr u32 us_to_ns = 1000;
-  constexpr u32 max_value = static_cast<u32>(-1);
-  u32 d_ns =
+void us(uint32_t duration_us) {
+  constexpr uint32_t us_to_ns = 1000;
+  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
+  uint32_t d_ns =
       (duration_us < max_value - us_to_ns) ? duration_us * us_to_ns : max_value;
   ns(d_ns);
 }
 
-void ms(u16 duration_ms) {
-  constexpr u32 ms_to_us = 1000;
-  constexpr u32 max_value = static_cast<u32>(-1);
-  u32 duration = static_cast<u32>(duration_ms);
-  u32 d_us =
+void ms(uint16_t duration_ms) {
+  constexpr uint32_t ms_to_us = 1000;
+  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
+  uint32_t duration = static_cast<uint32_t>(duration_ms);
+  uint32_t d_us =
       (duration < max_value - ms_to_us) ? duration * ms_to_us : max_value;
   us(d_us);
 }
 
-void s(u8 duration_s) {
-  constexpr u32 s_to_ms = 1000;
-  constexpr u32 max_value = static_cast<u32>(-1);
-  u32 duration = static_cast<u32>(duration_s);
-  u32 d_ms = (duration < max_value - s_to_ms) ? duration * s_to_ms : max_value;
+void s(uint8_t duration_s) {
+  constexpr uint32_t s_to_ms = 1000;
+  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
+  uint32_t duration = static_cast<uint32_t>(duration_s);
+  uint32_t d_ms =
+      (duration < max_value - s_to_ms) ? duration * s_to_ms : max_value;
   ms(d_ms);
 }
 
@@ -141,7 +139,7 @@ void s(u8 duration_s) {
 ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt += (1 << 8); }
 
 namespace INT {
-static u16 noOfTicks;
+static uint16_t noOfTicks;
 void stop();
 
 void startTimer1() {
@@ -155,7 +153,7 @@ void startTimer1() {
 
 void stopTimer1() { TCCR1B = 0x00; }
 
-unsigned int getTimerTicks() { return TCNT1; }
+uint16_t getTimerTicks() { return TCNT1; }
 
 void start() {
   startTimer1();
@@ -172,10 +170,10 @@ void stop() {
 } // namespace INT
 
 SoftwareSerial targetSerial(HW::BLANK, HW::TX_1);
-unsigned int send_1byte(uint8_t key) {
+uint16_t send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
-  for (int i = 0; i < 16; i++) {
+  for (uint16_t i = 0; i < 16; i++) {
     targetSerial.write(zero);
     delay(40);
   }
@@ -209,10 +207,10 @@ unsigned int send_1byte(uint8_t key) {
 }
 
 void send_256_bytes() {
-  unsigned int max_value = 0;
-  unsigned int max_digit = 0;
-  for (unsigned int k = 0; k < 256; k++) {
-    unsigned int required_time = send_1byte(k);
+  uint16_t max_value = 0;
+  uint16_t max_digit = 0;
+  for (uint16_t k = 0; k < 256; k++) {
+    uint16_t required_time = send_1byte(k);
 
     // reset after sending
 
