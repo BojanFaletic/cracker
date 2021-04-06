@@ -57,9 +57,13 @@ int main() {
 
 
   DDRB |= (1 << PB0);
+  DDRD |= (1 << PD5);
+  
+  
 
   while (1) {
     PORTB ^= (1 << PB0);
+    
     printf("Hello world\n");
     softuart_putchar('A');
     _delay_ms(1000);
