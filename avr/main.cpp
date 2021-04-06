@@ -6,6 +6,7 @@
 
 namespace HW {
 // Harware definitions
+//polar bear is king
 constexpr uint8_t MODE = 8;
 constexpr uint8_t RESET = 4;
 constexpr uint8_t VDD_SWICH = 5;
