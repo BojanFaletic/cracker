@@ -103,7 +103,8 @@ void _delay(uint32_t ticks) {
 }
 
 void ns(uint32_t duration_ns) {
-  uint32_t ticks = duration_ns / F_CPU;
+  constexpr uint32_t ns_to_ticks = 1e9 / F_CPU;
+  uint32_t ticks = duration_ns / ns_to_ticks;
   _delay(ticks);
 }
 
