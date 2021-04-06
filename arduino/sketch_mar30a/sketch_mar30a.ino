@@ -97,9 +97,18 @@ void _delay(uint32_t ticks) {
   counter_ov_cnt = 0;
   _clear();
   _start();
-  auto cnt_ticks = []() { return counter_ov_cnt | TCNT2; };
-  while (cnt_ticks() < ticks)
-    ;
+  auto cnt_ticks = []() {
+    return counter_ov_cnt | static_cast<uint32_t>(TCNT2);
+  };
+  uint32_t counter_value = cnt_ticks();
+
+  Serial.println("Here0");
+  Serial.println(ticks);
+  while (counter_value < ticks) {
+    counter_value = cnt_ticks();
+    Serial.println(counter_value);
+  }
+  Serial.println("Here1");
   _stop();
 }
 
@@ -138,7 +147,7 @@ void s(uint8_t duration_s) {
 } // namespace DELAY
 
 // timer 2 overflow
-ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt += (1 << 8); }
+ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt + ; }
 
 namespace INT {
 static uint16_t noOfTicks;
@@ -296,7 +305,8 @@ void setup() {
 void loop() {
   Serial.println("Press button to start cracking process.");
 
-  while (digitalRead(HW::BUTTON) == HIGH);
+  while (digitalRead(HW::BUTTON) == HIGH)
+    ;
 
   Serial.println("Start of process");
   DELAY::ms(400);
@@ -307,5 +317,6 @@ void loop() {
 
   Serial.println("End of process");
 
-  while (1);
+  while (1)
+    ;
 }
