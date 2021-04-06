@@ -44,3 +44,8 @@ void stream_init() {
   uart_stream.flags = _FDEV_SETUP_RW;
   stdout = stdin = &uart_stream;
 }
+
+void uart_init(){
+  uart_initialize();
+  stream_init();
+}

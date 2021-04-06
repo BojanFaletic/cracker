@@ -49,7 +49,7 @@ void stop() {
 
 
 int main() {
-  init_uart();
+  uart_init();
 
   // soft uart
   init_tx();
