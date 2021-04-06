@@ -1,22 +1,19 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-int main ()
-{
-	DDRB |= (1 << PB0);
+#include "print.hpp"
+#include "softuart.hpp"
 
-	while(1) 
-	{
-		PORTB ^= (1 << PB0);
-		_delay_us(1000);
-		_delay_ms(1000);
-		/*_delay_ms(1000);
-		_delay_ms(1000);
-		_delay_ms(1000);
-		_delay_ms(1000);
-		_delay_ms(1000);*/
-	}
-}
+namespace HW {
+// Harware definitions
+constexpr uint8_t MODE = 8;
+constexpr uint8_t RESET = 4;
+constexpr uint8_t VDD_SWICH = 5;
+constexpr uint8_t RX_1 = 3;
+constexpr uint8_t TX_1 = 9;
+constexpr uint8_t BLANK = 12;
+constexpr uint8_t BUTTON = 11;
+} // namespace HW
 
 namespace INT {
 static uint16_t noOfTicks;
@@ -37,8 +34,10 @@ uint16_t getTimerTicks() { return TCNT1; }
 
 void start() {
   startTimer1();
+  /*
   while (digitalRead(HW::RX_1))
     ;
+    */
   stop();
 }
 
@@ -46,5 +45,22 @@ void stop() {
   stopTimer1();
   noOfTicks = getTimerTicks();
 }
-
 } // namespace INT
+
+
+int main() {
+  init_uart();
+
+  // soft uart
+  init_tx();
+
+
+  DDRB |= (1 << PB0);
+
+  while (1) {
+    PORTB ^= (1 << PB0);
+    printf("Hello world\n");
+    softuart_putchar('A');
+    _delay_us(1000);
+  }
+}
