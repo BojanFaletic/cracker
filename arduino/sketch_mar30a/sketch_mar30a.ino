@@ -175,7 +175,7 @@ uint16_t send_1byte(uint8_t key) {
 
   for (uint16_t i = 0; i < 16; i++) {
     targetSerial.write(zero);
-    DELAY::ms(40);
+    DELAY::ms(30);
   }
 
   // send header
@@ -214,7 +214,7 @@ void send_256_bytes() {
 
     // reset after sending
 
-    DELAY::ms(200);
+    DELAY::ms(100);
     RST::off();
     DELAY::ms(200);
     RST::on();
@@ -270,9 +270,9 @@ void bootload_target() {
   MODE::bootloader();
   DELAY::ms(300);
   RST::off();
-  DELAY::ms(300);
+  DELAY::ms(200);
   RST::on();
-  DELAY::ms(300);
+  DELAY::ms(200);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -294,8 +294,7 @@ void setup() {
 void loop() {
   Serial.println("Press button to start cracking process.");
 
-  while (digitalRead(HW::BUTTON) == HIGH)
-    ;
+  while (digitalRead(HW::BUTTON) == HIGH);
 
   Serial.println("Start of process");
   DELAY::ms(400);
@@ -306,6 +305,5 @@ void loop() {
 
   Serial.println("End of process");
 
-  while (1)
-    ;
+  while (1);
 }
