@@ -22,6 +22,7 @@ constexpr uint8_t RX_1 = 3;
 constexpr uint8_t TX_1 = 9;
 constexpr uint8_t BLANK = 12;
 constexpr uint8_t BUTTON = 11;
+
 } // namespace HW
 
 namespace UART {
@@ -34,7 +35,7 @@ constexpr uint16_t RNS8_BAUD = 9600;
 
 namespace RST {
 // Reset pin
-static uint8_t rst_prev = 1;
+static uint8_t rst_prev = 0;
 void off() {
   digitalWrite(HW::RESET, 1);
   rst_prev = 1;
@@ -47,7 +48,7 @@ void on() {
 
 namespace MODE {
 // Mode pin
-static uint8_t mode_prev = 1;
+static uint8_t mode_prev = 0;
 void bootloader() {
   digitalWrite(HW::MODE, 1);
   mode_prev = 1;
@@ -98,22 +99,22 @@ void _delay(uint32_t ticks) {
   _clear();
   _start();
   auto cnt_ticks = []() {
-    return counter_ov_cnt | static_cast<uint32_t>(TCNT2);
+    return (counter_ov_cnt << 8) | static_cast<uint32_t>(TCNT2);
   };
   uint32_t counter_value = cnt_ticks();
 
-  Serial.println("Here0");
-  Serial.println(ticks);
-  while (counter_value < ticks) {
+  
+  
+  while (cnt_ticks() < ticks) {
     counter_value = cnt_ticks();
-    Serial.println(counter_value);
+    
   }
-  Serial.println("Here1");
+  
   _stop();
 }
 
 void ns(uint32_t duration_ns) {
-  constexpr uint32_t ns_to_ticks = 1e9 / F_CPU;
+  constexpr uint32_t ns_to_ticks = ((1e9 / F_CPU)*2);
   uint32_t ticks = duration_ns / ns_to_ticks;
   _delay(ticks);
 }
@@ -147,7 +148,7 @@ void s(uint8_t duration_s) {
 } // namespace DELAY
 
 // timer 2 overflow
-ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt + ; }
+ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt ++ ; }
 
 namespace INT {
 static uint16_t noOfTicks;
@@ -184,10 +185,12 @@ SoftwareSerial targetSerial(HW::BLANK, HW::TX_1);
 uint16_t send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
+  
   for (uint16_t i = 0; i < 16; i++) {
     targetSerial.write(zero);
     DELAY::ms(30);
   }
+  
 
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
@@ -197,13 +200,18 @@ uint16_t send_1byte(uint8_t key) {
 
   // send key
 
+  
+  
+  
+  
+  targetSerial.write(zero);
+  targetSerial.write(zero);
+  targetSerial.write(zero);
+  targetSerial.write(zero);
+  targetSerial.write(zero);
   targetSerial.write(key);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
+  targetSerial.write(40);
+  
 
   // send query
   targetSerial.write(0x70);
@@ -221,16 +229,35 @@ void send_256_bytes() {
   uint16_t max_value = 0;
   uint16_t max_digit = 0;
   for (uint16_t k = 0; k < 256; k++) {
+    
+    DELAY::ms(100);
+    VDD::off();
+    RST::off();
+    DELAY::ms(1000);
+    VDD::on();
+    DELAY::ms(100);
+    RST::on(); 
+    DELAY::ms(218); 
+    DELAY::us(125);
+    
     uint16_t required_time = send_1byte(k);
 
     // reset after sending
 
-    DELAY::ms(100);
+    /*DELAY::ms(100);
     RST::off();
     DELAY::ms(200);
     RST::on();
+    DELAY::ms(300);
+    VDD::off();
     DELAY::ms(200);
+    VDD::on();
+    DELAY::ms(300);
+    //DELAY::us(55);*/
 
+    
+
+    
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" required time: ");
@@ -256,11 +283,11 @@ void reset_target() {
   DELAY::ms(400);
 }
 
-void bootload_target() {
+/*void bootload_target() {
   // Start
   VDD::on();
   DELAY::ms(300);
-  VDD::on();
+  RST::on();
   DELAY::ms(300);
   MODE::program();
   DELAY::ms(300);
@@ -283,8 +310,9 @@ void bootload_target() {
   RST::off();
   DELAY::ms(200);
   RST::on();
-  DELAY::ms(200);
-}
+  DELAY::ms(0); 
+  //DELAY::us(330);
+}*/
 
 ////////////////////////////////////////////////////////////////////
 /////////////////////////// ARDUINO ////////////////////////////////
@@ -311,7 +339,7 @@ void loop() {
   Serial.println("Start of process");
   DELAY::ms(400);
 
-  bootload_target();
+  //bootload_target();
   send_256_bytes();
   reset_target();
 

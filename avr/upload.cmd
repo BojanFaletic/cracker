@@ -1,0 +1,1 @@
+"D:\Programi za programiranje\AVRDUDESS\avrdude.exe" -u -c arduino -p m328p -P COM7 -U flash:w:"main.hex":i 

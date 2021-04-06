@@ -1,0 +1,3 @@
+"C:\Program Files (x86)\Arduino\hardware\tools\avr\bin\avr-g++" -Os -w -std=gnu++11 -fpermissive -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics -Wno-error=narrowing -flto main.cpp -o main.elf -I"C:\Program Files (x86)\Arduino\hardware\tools\avr\avr\include" -DF_CPU=16000000UL -mmcu=atmega328p
+"C:\Program Files (x86)\Arduino\hardware\tools\avr\bin\avr-objcopy" -O ihex main.elf main.hex
+"C:\Program Files (x86)\Arduino\hardware\tools\avr\bin\avr-size" -A main.elf 
