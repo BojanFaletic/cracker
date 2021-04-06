@@ -61,6 +61,6 @@ int main() {
     PORTB ^= (1 << PB0);
     printf("Hello world\n");
     softuart_putchar('A');
-    _delay_us(1000);
+    _delay_ms(1000);
   }
 }

@@ -3,7 +3,6 @@
 #ifndef __AVR_ATmega328P__
 #define __AVR_ATmega328P__
 #endif
-
 #include <avr/io.h>
 #include <stdio.h>
 
@@ -30,7 +29,7 @@ int uart_get_byte(FILE *stream) {
   return UDR0;
 }
 
-void uart_hw_initialize() {
+void uart_initialize() {
   UBRR0H = (BAUD_PRESCALE >> 8);
   UBRR0L = BAUD_PRESCALE;
   UCSR0B = (1 << RXEN0) | (1 << TXEN0);
@@ -44,9 +43,4 @@ void stream_init() {
   uart_stream.get = uart_get_byte;
   uart_stream.flags = _FDEV_SETUP_RW;
   stdout = stdin = &uart_stream;
-}
-
-void init_uart(){
-  uart_hw_initialize();
-  stream_init();
 }

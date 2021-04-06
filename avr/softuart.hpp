@@ -23,8 +23,6 @@ void wait_for_baud() {
 }
 
 void set() {
-  // configure pin as input
-  clear_pin(SOFT_DDR_PORT, SOFT_TX_PIN);
   // enable pull up resistor
   set_pin(SOFT_PORT, SOFT_TX_PIN);
 }
@@ -32,8 +30,6 @@ void set() {
 void clear() {
   // disable pullup resistor
   clear_pin(SOFT_PORT, SOFT_TX_PIN);
-  // set low impedance (LOW output)
-  clear_pin(SOFT_DDR_PORT, SOFT_TX_PIN);
 }
 
 void send_bit(bool value) {
@@ -47,7 +43,7 @@ void send_bit(bool value) {
 
 void init_tx() {
   // set as high impedance
-  clear_pin(SOFT_DDR_PORT, SOFT_TX_PIN);
+  set_pin(SOFT_DDR_PORT, SOFT_TX_PIN);
   // input with pullup
   set_pin(SOFT_PORT, SOFT_TX_PIN);
 }
