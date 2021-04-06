@@ -90,6 +90,7 @@ void init() {
   _stop();
   _clear();
   _overflow_int();
+  sei();
 }
 
 void _delay(uint32_t ticks) {
