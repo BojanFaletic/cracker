@@ -21,7 +21,7 @@ void wait_for_baud() {
 
 void set() { PORTB |= (1 << PINB1); }
 
-void clear() { PORTB &= (1 << PINB1); }
+void clear() { PORTB &= ~(1 << PINB1); }
 
 void send_bit(bool value) {
   if (value) {
