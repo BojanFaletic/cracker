@@ -96,7 +96,7 @@ void digitalWrite(uint8_t pin, bool bit) {
   if (pin > 7) {
     port = (volatile uint8_t *)PORTB;
   } else {
-    port = (volatile uint8_t *)PORTB;
+    port = (volatile uint8_t *)PORTD;
   }
 
   if (bit) {

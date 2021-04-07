@@ -238,7 +238,8 @@ void send_256_bytes() {
     DELAY::ms(100);
     RST::on(); 
     DELAY::ms(218); 
-    DELAY::us(125);
+    DELAY::us(84);
+    DELAY::ns(250);
     
     uint16_t required_time = send_1byte(k);
 
