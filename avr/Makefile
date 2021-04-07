@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean upload
 .SILENT:
 
 CXXPATH=/usr/bin/
@@ -25,3 +25,6 @@ main.hex: main.elf
 
 clean:
 	rm -f main.elf main.hex
+
+upload:	main.hex
+	avrdude -u -c arduino -p m328p-U flash:w:$<:i

@@ -8,3 +8,4 @@
 !avr/header
 !avr/*.cpp
 !avr/*.cmd
+!avr/Makefile
