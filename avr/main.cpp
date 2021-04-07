@@ -1,7 +1,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <util/delay.h>
 #include <stdio.h>
+#include <util/delay.h>
 
 #ifndef __AVR_ATmega328P__
 #define __AVR_ATmega328P__
@@ -84,7 +84,7 @@ void stream_init() {
   stdout = stdin = &uart_stream;
 }
 
-void init_uart() {
+void init_UART() {
   uart_initialize();
   stream_init();
 }
@@ -181,59 +181,27 @@ void stop() {
 } // namespace INT
 
 namespace DELAY {
-static uint32_t counter_ov_cnt;
-constexpr uint8_t CLK_DIV_1 = 1 << 0;
-
-void _start() { TCCR2B = CLK_DIV_1; }
-void _stop() { TCCR2B = 0x00; }
-void _clear() {
-  TCNT2 = 0x00;
-  counter_ov_cnt = 0;
-}
-void _overflow_int() { TIMSK2 = 0x01; }
-
-void init() {
-  _stop();
-  _clear();
-  _overflow_int();
-  sei();
-}
-
-void _delay(uint32_t ticks) {
-  counter_ov_cnt = 0;
-  _clear();
-  _start();
-  auto cnt_ticks = []() {
-    return (counter_ov_cnt << 8) | static_cast<uint32_t>(TCNT2);
-  };
-  while (cnt_ticks() < ticks) {
-  }
-  _stop();
-}
-
 void ns(uint32_t duration_ns) {
   constexpr uint32_t ns_to_ticks = ((1e9 / F_CPU) * 2);
   uint32_t ticks = duration_ns / ns_to_ticks;
-  _delay(ticks);
+
+  volatile uint32_t counted_ticks = 0;
+  while (counted_ticks < ticks) {
+    counted_ticks++;
+  }
 }
 
 void us(uint32_t duration_us) {
-  constexpr uint32_t us_to_ns = 1000;
-  uint32_t ns_time = duration_us * us_to_ns;
-  ns(ns_time);
+  ns(duration_us*1000);
 }
 
 void ms(uint32_t duration_ms) {
-  constexpr uint32_t ms_to_us = 1000;
-  uint32_t us_time = duration_ms * ms_to_us;
-  us(us_time);
+  us(duration_ms*1000);
 }
 
 void s(uint8_t duration_s) {
-  constexpr uint32_t s_to_ms = 1000;
   uint32_t duration = static_cast<uint32_t>(duration_s);
-  uint32_t d_ms = duration * s_to_ms;
-  ms(d_ms);
+  ms(duration * 1000);
 }
 } // namespace DELAY
 
@@ -301,7 +269,7 @@ void send_256_bytes() {
   printf("Max digit: %u\n", max_digit);
 }
 
-void init_hw() {
+void init_IO() {
   // Set output pins
   DDRD |= _BV(HW::RESET) | _BV(HW::TX_1) | _BV(HW::VDD_SWICH);
   DDRB |= _BV(0) | _BV(1) | _BV(3) | _BV(4);
@@ -313,9 +281,9 @@ void init_hw() {
 
 int main() {
   // Initialize all hardware
-  init_hw();
-  init_uart();
-  DELAY::init();
+  init_IO();
+  init_UART();
+  sei();
 
   while (1) {
     printf("Press button to start cracking process.\n");
@@ -329,7 +297,6 @@ int main() {
     reset_target();
 
     printf("DONE\n");
-
     while (1) {
     }
   }
