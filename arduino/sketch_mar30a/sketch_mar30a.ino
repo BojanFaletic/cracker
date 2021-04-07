@@ -188,7 +188,7 @@ uint16_t send_1byte(uint8_t key) {
 
   for (uint16_t i = 0; i < 16; i++) {
     targetSerial.write(zero);
-    DELAY::ms(30);
+    DELAY::ms(15);
   }
 
 
@@ -206,8 +206,7 @@ uint16_t send_1byte(uint8_t key) {
 
 
   targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
+ targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(key);
