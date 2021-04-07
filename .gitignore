@@ -5,7 +5,6 @@
 !arduino
 !*.py
 !*.txt
-!avr
-!avr/*.cmd
+!avr/header
 !avr/*.cpp
-!avr/*.hpp
+!avr/*.cmd

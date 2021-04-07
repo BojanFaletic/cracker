@@ -32,13 +32,6 @@ void send_bit(bool value) {
   return;
 }
 
-void init_tx() {
-  // set as high impedance
-  DDRB |= (1 << PINB1);
-  // input with pullup
-  PORTB |= (1 << PINB1);
-}
-
 void softuart_putchar(char ch) {
   for (int i = 0; i < 10; i++) {
     // start bit
