@@ -103,13 +103,13 @@ void _delay(uint32_t ticks) {
   };
   uint32_t counter_value = cnt_ticks();
 
-  
-  
+
+
   while (cnt_ticks() < ticks) {
     counter_value = cnt_ticks();
-    
+
   }
-  
+
   _stop();
 }
 
@@ -185,12 +185,12 @@ SoftwareSerial targetSerial(HW::BLANK, HW::TX_1);
 uint16_t send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
-  
+
   for (uint16_t i = 0; i < 16; i++) {
     targetSerial.write(zero);
     DELAY::ms(30);
   }
-  
+
 
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
@@ -200,10 +200,11 @@ uint16_t send_1byte(uint8_t key) {
 
   // send key
 
-  
-  
-  
-  
+
+  // TEST 123
+
+
+
   targetSerial.write(zero);
   targetSerial.write(zero);
   targetSerial.write(zero);
@@ -211,7 +212,7 @@ uint16_t send_1byte(uint8_t key) {
   targetSerial.write(zero);
   targetSerial.write(key);
   targetSerial.write(40);
-  
+
 
   // send query
   targetSerial.write(0x70);
@@ -229,18 +230,18 @@ void send_256_bytes() {
   uint16_t max_value = 0;
   uint16_t max_digit = 0;
   for (uint16_t k = 0; k < 256; k++) {
-    
+
     DELAY::ms(100);
     VDD::off();
     RST::off();
     DELAY::ms(1000);
     VDD::on();
     DELAY::ms(100);
-    RST::on(); 
-    DELAY::ms(218); 
+    RST::on();
+    DELAY::ms(218);
     DELAY::us(84);
     DELAY::ns(250);
-    
+
     uint16_t required_time = send_1byte(k);
 
     // reset after sending
@@ -256,9 +257,9 @@ void send_256_bytes() {
     DELAY::ms(300);
     //DELAY::us(55);*/
 
-    
 
-    
+
+
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" required time: ");
@@ -311,7 +312,7 @@ void reset_target() {
   RST::off();
   DELAY::ms(200);
   RST::on();
-  DELAY::ms(0); 
+  DELAY::ms(0);
   //DELAY::us(330);
 }*/
 
