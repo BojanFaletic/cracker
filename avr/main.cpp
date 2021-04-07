@@ -94,9 +94,9 @@ void digitalWrite(uint8_t pin, bool bit) {
   volatile uint8_t *port;
   uint8_t bit_name = bit % 8;
   if (pin > 7) {
-    port = (volatile uint8_t *)DDRB;
+    port = (volatile uint8_t *)PORTB;
   } else {
-    port = (volatile uint8_t *)DDRD;
+    port = (volatile uint8_t *)PORTB;
   }
 
   if (bit) {
