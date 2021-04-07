@@ -191,13 +191,9 @@ void ns(uint32_t duration_ns) {
   }
 }
 
-void us(uint32_t duration_us) {
-  ns(duration_us*1000);
-}
+void us(uint32_t duration_us) { ns(duration_us * 1000); }
 
-void ms(uint32_t duration_ms) {
-  us(duration_ms*1000);
-}
+void ms(uint32_t duration_ms) { us(duration_ms * 1000); }
 
 void s(uint8_t duration_s) {
   uint32_t duration = static_cast<uint32_t>(duration_s);
@@ -274,6 +270,9 @@ void init_IO() {
   DDRD |= _BV(HW::RESET) | _BV(HW::TX_1) | _BV(HW::VDD_SWICH);
   DDRB |= _BV(0) | _BV(1) | _BV(3) | _BV(4);
 
+  // Set TX_1 to high
+  digitalWrite(HW::TX_1, 1);
+
   // Activate pullups
   digitalWrite(HW::RX_1, 1);
   digitalWrite(HW::BUTTON, 1);
@@ -287,8 +286,10 @@ int main() {
 
   while (1) {
     printf("Press button to start cracking process.\n");
+
     // Wait unit button is pressed
-    loop_until_bit_is_set(PINB, 3);
+    while (PINB & (1 << 3)) {
+    }
 
     printf("Start of process");
     DELAY::ms(200);
