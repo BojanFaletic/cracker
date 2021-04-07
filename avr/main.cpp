@@ -1,23 +1,95 @@
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdio.h>
 
-#define HIGH 1
-#define LOW 0
+#ifndef __AVR_ATmega328P__
+#define __AVR_ATmega328P__
+#endif
 
-#include "print.hpp"
-#include "softuart.hpp"
+#define BAUD_RATE 9600
+#define BAUD_PRESCALE (F_CPU / 16 / BAUD_RATE - 1)
 
 namespace HW {
-// Harware definitions
 constexpr uint8_t MODE = 8;
 constexpr uint8_t RESET = 4;
 constexpr uint8_t VDD_SWICH = 5;
 constexpr uint8_t RX_1 = 3;
 constexpr uint8_t TX_1 = 9;
-constexpr uint8_t BLANK = 12;
 constexpr uint8_t BUTTON = 11;
 } // namespace HW
 
+///////////////////////////   UART-RC8   ///////////////////////////
+void send_bit(bool bit_value) {
+  if (bit_value) {
+    PORTB |= (1 << PINB1);
+  } else {
+    PORTB &= ~(1 << PINB1);
+  }
+}
+
+void softuart_putchar(char ch) {
+  constexpr uint16_t delay = 1e6 / BAUD_RATE;
+  for (int i = 0; i < 10; i++) {
+    // Wait before sending bit
+    _delay_us(delay);
+
+    // Start bit
+    if (i == 0) {
+      send_bit(0);
+      continue;
+    }
+
+    if (i < 9) {
+      // Send 8 bits of data
+      bool value = ch & 0x01;
+      ch >>= 1;
+      send_bit(value);
+      continue;
+    }
+
+    // Stop bit
+    send_bit(1);
+  }
+}
+
+///////////////////////////   UART-PC   ///////////////////////////
+int uart_send_byte(char byte, FILE *stream) {
+  if (byte == '\n') {
+    uart_send_byte('\r', stream);
+  }
+  loop_until_bit_is_set(UCSR0A, UDRE0);
+  UDR0 = byte;
+  return 0;
+}
+
+int uart_get_byte(FILE *stream) {
+  loop_until_bit_is_set(UCSR0A, RXC0);
+  return UDR0;
+}
+
+void uart_initialize() {
+  UBRR0H = (BAUD_PRESCALE >> 8);
+  UBRR0L = BAUD_PRESCALE;
+  UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+  UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+}
+
+static FILE uart_stream;
+
+void stream_init() {
+  uart_stream.put = uart_send_byte;
+  uart_stream.get = uart_get_byte;
+  uart_stream.flags = _FDEV_SETUP_RW;
+  stdout = stdin = &uart_stream;
+}
+
+void init_uart() {
+  uart_initialize();
+  stream_init();
+}
+
+////////////////////////////   HW-IO   ////////////////////////////
 void digitalWrite(uint8_t pin, bool bit) {
   volatile uint8_t *port;
   uint8_t bit_name = bit % 8;
@@ -63,16 +135,16 @@ void program() {
 namespace VDD {
 void on() {
   MODE::bootloader();
-  digitalWrite(HW::TX_1, HIGH);
+  digitalWrite(HW::TX_1, 1);
   digitalWrite(HW::MODE, MODE::mode_prev);
   digitalWrite(HW::RESET, RST::rst_prev);
-  digitalWrite(HW::VDD_SWICH, LOW);
+  digitalWrite(HW::VDD_SWICH, 0);
 }
 void off() {
-  digitalWrite(HW::TX_1, LOW);
-  digitalWrite(HW::MODE, HIGH);
-  digitalWrite(HW::RESET, HIGH);
-  digitalWrite(HW::VDD_SWICH, HIGH);
+  digitalWrite(HW::TX_1, 0);
+  digitalWrite(HW::MODE, 1);
+  digitalWrite(HW::RESET, 1);
+  digitalWrite(HW::VDD_SWICH, 1);
 }
 } // namespace VDD
 
@@ -134,7 +206,6 @@ void _delay(uint32_t ticks) {
   auto cnt_ticks = []() {
     return (counter_ov_cnt << 8) | static_cast<uint32_t>(TCNT2);
   };
-
   while (cnt_ticks() < ticks) {
   }
   _stop();
@@ -146,51 +217,27 @@ void ns(uint32_t duration_ns) {
   _delay(ticks);
 }
 
-void us(uint32_t duration_us) { _delay_us(duration_us); }
+void us(uint32_t duration_us) {
+  constexpr uint32_t us_to_ns = 1000;
+  uint32_t ns_time = duration_us * us_to_ns;
+  ns(ns_time);
+}
 
-void ms(uint16_t duration_ms) { _delay_ms(duration_ms); }
+void ms(uint32_t duration_ms) {
+  constexpr uint32_t ms_to_us = 1000;
+  uint32_t us_time = duration_ms * ms_to_us;
+  us(us_time);
+}
 
 void s(uint8_t duration_s) {
   constexpr uint32_t s_to_ms = 1000;
-  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
   uint32_t duration = static_cast<uint32_t>(duration_s);
-  uint32_t d_ms =
-      (duration < max_value - s_to_ms) ? duration * s_to_ms : max_value;
+  uint32_t d_ms = duration * s_to_ms;
   ms(d_ms);
 }
+} // namespace DELAY
 
-uint16_t send_1byte(uint8_t key) {
-  // send wakeup time
-  for (uint16_t i = 0; i < 16; i++) {
-    softuart_putchar(0x00);
-    DELAY::ms(30);
-  }
-
-  // send header
-  constexpr uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
-  for (uint8_t el : header) {
-    softuart_putchar(el);
-  }
-
-  // send key
-  softuart_putchar(0x00);
-  softuart_putchar(0x00);
-  softuart_putchar(0x00);
-  softuart_putchar(0x00);
-  softuart_putchar(0x00);
-  softuart_putchar(0x00);
-  softuart_putchar(key);
-
-  // send query
-  softuart_putchar(0x70);
-
-  // Start interrupt on falling edge (pooling mode)
-  INT::start();
-
-  DELAY::ms(4);
-  return INT::noOfTicks;
-}
-
+///////////////////////////   PROGRAM   ////////////////////////////
 void reset_target() {
   DELAY::ms(100);
   VDD::off();
@@ -203,6 +250,38 @@ void reset_target() {
   DELAY::us(125);
 }
 
+uint16_t send_1byte(uint8_t key) {
+  // Send wakeup time
+  for (uint16_t i = 0; i < 16; i++) {
+    softuart_putchar(0x00);
+    DELAY::ms(30);
+  }
+
+  // Send header
+  constexpr uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
+  for (uint8_t el : header) {
+    softuart_putchar(el);
+  }
+
+  // Send key
+  softuart_putchar(0x00);
+  softuart_putchar(0x00);
+  softuart_putchar(0x00);
+  softuart_putchar(0x00);
+  softuart_putchar(0x00);
+  softuart_putchar(0x00);
+  softuart_putchar(key);
+
+  // Send query
+  softuart_putchar(0x70);
+
+  // Start interrupt on falling edge (pooling mode)
+  INT::start();
+
+  DELAY::ms(4);
+  return INT::noOfTicks;
+}
+
 void send_256_bytes() {
   uint16_t max_value = 0;
   uint16_t max_digit = 0;
@@ -212,7 +291,7 @@ void send_256_bytes() {
     reset_target();
 
     uint16_t required_time = send_1byte(k);
-    printf("Sending %u = %ul\n", k, required_time);
+    printf("Sending: %u = %ul ticks \n", k, required_time);
 
     if (max_value < required_time) {
       max_value = required_time;
@@ -223,7 +302,7 @@ void send_256_bytes() {
 }
 
 void init_hw() {
-  // set output pins
+  // Set output pins
   DDRD |= _BV(HW::RESET) | _BV(HW::TX_1) | _BV(HW::VDD_SWICH);
   DDRB |= _BV(0) | _BV(1) | _BV(3) | _BV(4);
 
@@ -233,12 +312,14 @@ void init_hw() {
 }
 
 int main() {
+  // Initialize all hardware
   init_hw();
   init_uart();
+  DELAY::init();
 
   while (1) {
     printf("Press button to start cracking process.\n");
-    // wait unit BUTTON is pressed
+    // Wait unit button is pressed
     loop_until_bit_is_set(PINB, 3);
 
     printf("Start of process");
