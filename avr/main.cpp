@@ -91,18 +91,21 @@ void init_UART() {
 
 ////////////////////////////   HW-IO   ////////////////////////////
 void digitalWrite(uint8_t pin, bool bit) {
-  volatile uint8_t *port;
   uint8_t bit_name = bit % 8;
   if (pin > 7) {
-    port = (volatile uint8_t *)PORTB;
+    // Write to port B
+    if (bit) {
+      PORTB |= (uint8_t)(1 << bit_name);
+    } else {
+      PORTB &= (uint8_t) ~(1 << bit_name);
+    }
   } else {
-    port = (volatile uint8_t *)PORTD;
-  }
-
-  if (bit) {
-    *port |= (uint8_t)(1 << bit_name);
-  } else {
-    *port &= (uint8_t) ~(1 << bit_name);
+    // Write to port D
+    if (bit) {
+      PORTD |= (uint8_t)(1 << bit_name);
+    } else {
+      PORTD &= (uint8_t) ~(1 << bit_name);
+    }
   }
 }
 
