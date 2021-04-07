@@ -45,7 +45,7 @@ void stream_init() {
   stdout = stdin = &uart_stream;
 }
 
-void uart_init(){
+void init_uart(){
   uart_initialize();
   stream_init();
 }
