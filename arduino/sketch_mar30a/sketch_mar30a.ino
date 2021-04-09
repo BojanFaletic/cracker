@@ -9,6 +9,8 @@
 #define digitalRead(x) (1)
 #endif
 
+void start_PWM();
+void stop_PWM();
 //////////////////////////////////////////////////
 ////////////////// Config parameters /////////////
 //////////////////////////////////////////////////
@@ -63,6 +65,7 @@ void program() {
 
 namespace VDD {
 void on() {
+  start_PWM();
   MODE::bootloader();
   digitalWrite(HW::TX_1, HIGH);
   digitalWrite(HW::MODE, MODE::mode_prev);
@@ -70,6 +73,7 @@ void on() {
   digitalWrite(HW::VDD_SWICH, LOW);
 }
 void off() {
+  stop_PWM();
   digitalWrite(HW::TX_1, LOW);
   digitalWrite(HW::MODE, HIGH);
   digitalWrite(HW::RESET, HIGH);
@@ -78,16 +82,6 @@ void off() {
 } // namespace VDD
 
 namespace DELAY {
-static uint32_t counter_ov_cnt;
-constexpr uint8_t CLK_DIV_1 = 1 << 0;
-
-void _start() { TCCR2B = CLK_DIV_1; }
-void _stop() { TCCR2B = 0x00; }
-void _clear() {
-  TCNT2 = 0x00;
-  counter_ov_cnt = 0;
-}
-
 template <int duration_us> void us() { _delay_us(duration_us); }
 
 template <int duration_ms> void ms() { _delay_ms(duration_ms); }
@@ -105,9 +99,6 @@ template <int duration_ns> void ns() {
 }
 
 } // namespace DELAY
-
-// timer 2 overflow
-ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt++; }
 
 namespace INT {
 static uint16_t noOfTicks;
@@ -151,10 +142,14 @@ void start_PWM() {
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
-  // Output to pin, 1024 prescaller
+  // Output to pin, 8 prescaller (1 MHZ)
   TCCR2B = 0b010 << 0;
 }
 
+void stop_PWM() {
+  TCCR2A = 0x00;
+  digitalWrite(HW::CLK, 0);
+}
 
 void send_bit(bool bit_value) {
   if (bit_value) {
@@ -244,7 +239,7 @@ void send_256_bytes() {
     RST::on();
 
     DELAY::ms<300>();
-    //DELAY::us<310>();
+    // DELAY::us<310>();
     // DELAY::ns<350>();
 
     uint16_t required_time = send_1byte(k);
@@ -282,7 +277,7 @@ void setup() {
   Serial.begin(UART::PC_BAUD);
 
   pinMode(HW::MODE, OUTPUT);
-  pinMode(HW::BUTTON, INPUT); 
+  pinMode(HW::BUTTON, INPUT);
   pinMode(HW::RESET, OUTPUT);
   pinMode(HW::VDD_SWICH, OUTPUT);
   pinMode(HW::CLK, OUTPUT);
