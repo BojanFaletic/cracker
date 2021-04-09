@@ -143,7 +143,7 @@ void start_PWM() {
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
   // Output to pin, 8 prescaller (1 MHZ)
-  TCCR2B = 0b010 << 0;
+  TCCR2B = 0b011 << 0;
 }
 
 void stop_PWM() {
@@ -160,7 +160,7 @@ void send_bit(bool bit_value) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = (1e6 / UART::PC_BAUD) * 16;
+  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD) * 16)*4;
   for (int i = 0; i < 10; i++) {
     // Wait before sending bit
     _delay_us(delay);
@@ -230,7 +230,7 @@ void send_256_bytes() {
   for (uint16_t k = 0; k < 256; k++) {
 
     /*reset po vsakem poslanem filu*/
-    DELAY::ms<100>();
+    DELAY::ms<300>();
     VDD::off();
     RST::off();
     DELAY::ms<1000>();
@@ -289,6 +289,9 @@ void setup() {
 }
 
 void loop() {
+
+  
+  
   Serial.println("Press button to start cracking process.");
 
   while (digitalRead(HW::BUTTON) == HIGH)
