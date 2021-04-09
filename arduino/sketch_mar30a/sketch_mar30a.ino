@@ -138,12 +138,12 @@ void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
   // Count to value
-  OCR2A = 255;
+  OCR2A = 1;
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
   // Output to pin, 8 prescaller (1 MHZ)
-  TCCR2B = 0b011 << 0;
+  TCCR2B = 0b010 << 0;
 }
 
 void stop_PWM() {
@@ -160,7 +160,7 @@ void send_bit(bool bit_value) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD) * 16)*4;
+  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD) * 16)*2;
   for (int i = 0; i < 10; i++) {
     // Wait before sending bit
     _delay_us(delay);
