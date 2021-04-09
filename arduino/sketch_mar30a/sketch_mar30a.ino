@@ -248,12 +248,9 @@ uint16_t send_1byte(uint8_t key) {
 
 
   // TEST 123
-
-
-  softuart_putchar(40); 
+  softuart_putchar(40);
   softuart_putchar(key);
- 
-  softuart_putchar(zero);
+  softuart_putchar(180); 
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
@@ -289,12 +286,12 @@ void send_256_bytes() {
     RST::off();
     DELAY::ms<1000>();
     VDD::on();
-    DELAY::ms<300>();
+    DELAY::ms<400>();
     RST::on();
 
     
     DELAY::ms<217>();
-    DELAY::us<310>();
+    DELAY::us<200>();
     //DELAY::ns<350>();
     
     
