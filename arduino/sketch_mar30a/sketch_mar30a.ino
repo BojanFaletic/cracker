@@ -21,7 +21,7 @@ constexpr uint8_t VDD_SWICH = 5;
 constexpr uint8_t RX_1 = 3;
 constexpr uint8_t TX_1 = 9;
 constexpr uint8_t BLANK = 12;
-constexpr uint8_t BUTTON = 11;
+constexpr uint8_t CLK = 11;
 
 } // namespace HW
 int incomingByte = 0;
@@ -139,7 +139,33 @@ void stop() {
 
 } // namespace INT
 
-/////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////// PWM timer 2 /////////////////
+//////////////////////////////////////////////////
+static volatile uint16_t timer_cnt_value = 0;
+
+void start_PWM() {
+  // Set counter value to 0
+  TCNT2 = 0x00;
+  // Reset TCCR1A options since Arduino likes to enable some of them.
+  TCCR2A = 0x00;
+  // Set timer to normal mode and set prescaler to 1024.
+  TCCR2B = 0b111;
+  // Enable interrupt of timer overflow
+  TIMSK2 = 0x01;
+
+  timer_cnt_value = 0;
+  sei();
+}
+
+ISR(TIMER2_OVF_vect) {
+  timer_cnt_value++;
+  if (timer_cnt_value == 10) {
+    timer_cnt_value = 0;
+    digitalWrite(HW::CLK, !digitalRead(HW::CLK));
+  }
+}
+
 void send_bit(bool bit_value) {
   if (bit_value) {
     PORTB |= (1 << PINB1);
@@ -191,17 +217,11 @@ uint16_t send_1byte(uint8_t key) {
   // send key
 
   // TEST 123
-<<<<<<< HEAD
-  softuart_putchar(40);
-  softuart_putchar(key);
-  softuart_putchar(180); 
-=======
 
   softuart_putchar(40);
   softuart_putchar(key);
 
   softuart_putchar(zero);
->>>>>>> master
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
@@ -234,39 +254,15 @@ void send_256_bytes() {
     RST::on();
 
     DELAY::ms<217>();
-<<<<<<< HEAD
-    DELAY::us<200>();
-    //DELAY::ns<350>();
-    
-    
-    uint16_t required_time = send_1byte(k);
-
-    // reset after sending
-
-    /*DELAY::ms(100);
-    RST::off();
-    DELAY::ms(200);
-    RST::on();
-    DELAY::ms(300);
-    VDD::off();
-    DELAY::ms(200);
-    VDD::on();
-    DELAY::ms(300);
-    //DELAY::us(55);*/
-
-=======
     DELAY::us<310>();
     // DELAY::ns<350>();
->>>>>>> master
 
     uint16_t required_time = send_1byte(k);
-
 
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" required time: ");
     Serial.println(required_time);
-
 
     if (max_value < required_time) {
       max_value = required_time;
@@ -288,23 +284,22 @@ void reset_target() {
   DELAY::ms<400>();
 }
 
-
 ////////////////////////////////////////////////////////////////////
 /////////////////////////// ARDUINO ////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 void setup() {
   Serial.begin(UART::PC_BAUD);
-  // targetSerial.begin(UART::RNS8_BAUD);
-  // DELAY::init();
 
   pinMode(HW::MODE, OUTPUT);
   pinMode(HW::RESET, OUTPUT);
   pinMode(HW::VDD_SWICH, OUTPUT);
-  pinMode(HW::BUTTON, INPUT);
+  pinMode(HW::CLK, OUTPUT);
   pinMode(HW::RX_1, INPUT_PULLUP);
   pinMode(HW::TX_1, OUTPUT);
   digitalWrite(HW::TX_1, HIGH);
+
+  start_PWM();
 }
 
 void loop() {
