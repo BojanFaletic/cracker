@@ -143,29 +143,18 @@ void stop() {
 //////////////////////////////////////////////////
 //////////////////// PWM timer 2 /////////////////
 //////////////////////////////////////////////////
-static volatile uint16_t timer_cnt_value = 0;
-
 void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
-  // Reset TCCR1A options since Arduino likes to enable some of them.
-  TCCR2A = 0x00;
-  // Set timer to normal mode and set prescaler to 1024.
-  TCCR2B = 0b111;
-  // Enable interrupt of timer overflow
-  TIMSK2 = 0x01;
+  // Count to value
+  OCR2A = 0xff;
 
-  timer_cnt_value = 0;
-  sei();
+  // Toggle on compare match (CTC mode)
+  TCCR2A = 0b01 << 6 | 0b10 << 0;
+  // Output to pin, 1024 prescaller
+  TCCR2B = 1 << 7 | 0b111 << 0;
 }
 
-ISR(TIMER2_OVF_vect) {
-  timer_cnt_value++;
-  if (timer_cnt_value == 10) {
-    timer_cnt_value = 0;
-    digitalWrite(HW::CLK, !digitalRead(HW::CLK));
-  }
-}
 
 void send_bit(bool bit_value) {
   if (bit_value) {
