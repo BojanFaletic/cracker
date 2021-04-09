@@ -24,6 +24,7 @@ constexpr uint8_t BLANK = 12;
 constexpr uint8_t BUTTON = 11;
 
 } // namespace HW
+int incomingByte = 0;
 
 namespace UART {
 // Baudrate for uart
@@ -85,22 +86,22 @@ void _clear() {
   TCNT2 = 0x00;
   counter_ov_cnt = 0;
 }
-void _overflow_int() { TIMSK2 = 0x01; }
+/*void _overflow_int() { TIMSK2 = 0x01; }
 
 void init() {
   _stop();
   _clear();
   _overflow_int();
   sei();
-}
+}*/
 
-void _delay(uint32_t ticks) {
+/*void _delay(uint32_t ticks) {
   counter_ov_cnt = 0;
   _clear();
   _start();
   auto cnt_ticks = []() {
     return (counter_ov_cnt << 8) | static_cast<uint32_t>(TCNT2);
-  };
+  }
   uint32_t counter_value = cnt_ticks();
 
 
@@ -111,39 +112,46 @@ void _delay(uint32_t ticks) {
   }
 
   _stop();
-}
+}*/
 
-void ns(uint32_t duration_ns) {
+/*void ns(uint32_t duration_ns) {
   constexpr uint32_t ns_to_ticks = ((1e9 / F_CPU)*2);
   uint32_t ticks = duration_ns / ns_to_ticks;
   _delay(ticks);
+}*/
+
+template<int duration_us>
+void us() {
+ delayMicroseconds(duration_us);
 }
 
-void us(uint32_t duration_us) {
-  constexpr uint32_t us_to_ns = 1000;
-  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
-  uint32_t d_ns =
-      (duration_us < max_value - us_to_ns) ? duration_us * us_to_ns : max_value;
-  ns(d_ns);
+template<int duration_ms>
+void ms() {
+  delay(duration_ms);
 }
 
-void ms(uint16_t duration_ms) {
-  constexpr uint32_t ms_to_us = 1000;
-  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
-  uint32_t duration = static_cast<uint32_t>(duration_ms);
-  uint32_t d_us =
-      (duration < max_value - ms_to_us) ? duration * ms_to_us : max_value;
-  us(d_us);
-}
+    template<int duration_ns>
+    void ns(){
+        constexpr int tick_ns = (1e9/F_CPU);
+        constexpr int ticks_low = duration_ns/tick_ns;
+        constexpr int ticks_high = (duration_ns+1)/tick_ns;
+        constexpr int ring = duration_ns % tick_ns;
+        constexpr int ticks = (ring < tick_ns/2) ? ticks_low : ticks_high;
+        
+        for (int i=0; i<ticks; i++){
+            asm volatile ("nop");
+        }
+    }
 
-void s(uint8_t duration_s) {
+
+/*void s(uint8_t duration_s) {
   constexpr uint32_t s_to_ms = 1000;
   constexpr uint32_t max_value = static_cast<uint32_t>(-1);
   uint32_t duration = static_cast<uint32_t>(duration_s);
   uint32_t d_ms =
       (duration < max_value - s_to_ms) ? duration * s_to_ms : max_value;
   ms(d_ms);
-}
+}*/
 
 } // namespace DELAY
 
@@ -181,21 +189,59 @@ void stop() {
 
 } // namespace INT
 
+/////////////////////////////////////////////////////////
+void send_bit(bool bit_value) {
+  if (bit_value) {
+    PORTB |= (1 << PINB1);
+  } else {
+    PORTB &= ~(1 << PINB1);
+  }
+}
+
+void softuart_putchar(char ch) {
+  constexpr uint16_t delay = 1e6 / UART::PC_BAUD;
+  for (int i = 0; i < 10; i++) {
+    // Wait before sending bit
+    _delay_us(delay);
+
+    // Start bit
+    if (i == 0) {
+      send_bit(0);
+      continue;
+    }
+
+    if (i < 9) {
+      // Send 8 bits of data
+      bool value = ch & 0x01;
+      ch >>= 1;
+      send_bit(value);
+      continue;
+    }
+
+    // Stop bit
+    send_bit(1);
+  }
+}
+/////////////////////////////////////////////////////////////
+
+
+
 SoftwareSerial targetSerial(HW::BLANK, HW::TX_1);
 uint16_t send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
 
   for (uint16_t i = 0; i < 16; i++) {
-    targetSerial.write(zero);
-    DELAY::ms(15);
+    softuart_putchar(zero);
+    DELAY::ms<30>();
   }
+
 
 
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
-    targetSerial.write(el);
+  softuart_putchar(el);
   }
 
   // send key
@@ -204,25 +250,32 @@ uint16_t send_1byte(uint8_t key) {
   // TEST 123
 
 
-
-  targetSerial.write(zero);
- targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(zero);
-  targetSerial.write(key);
-  targetSerial.write(40);
+  softuart_putchar(40); 
+  softuart_putchar(key);
+ 
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  
+  
+   
+ 
 
 
   // send query
-  targetSerial.write(0x70);
-
+  softuart_putchar(0x70);
+  
   // Start interrupt on falling edge
   INT::start();
 
   // Delay for max timeout (4ms)
-  DELAY::ms(4);
+  DELAY::ms<4>();
 
   return INT::noOfTicks;
+
+  
 }
 
 void send_256_bytes() {
@@ -230,17 +283,21 @@ void send_256_bytes() {
   uint16_t max_digit = 0;
   for (uint16_t k = 0; k < 256; k++) {
 
-    DELAY::ms(100);
+/*reset po vsakem poslanem filu*/
+    DELAY::ms<100>();
     VDD::off();
     RST::off();
-    DELAY::ms(1000);
+    DELAY::ms<1000>();
     VDD::on();
-    DELAY::ms(100);
+    DELAY::ms<300>();
     RST::on();
-    DELAY::ms(218);
-    DELAY::us(84);
-    DELAY::ns(250);
 
+    
+    DELAY::ms<217>();
+    DELAY::us<310>();
+    //DELAY::ns<350>();
+    
+    
     uint16_t required_time = send_1byte(k);
 
     // reset after sending
@@ -264,6 +321,12 @@ void send_256_bytes() {
     Serial.print(" required time: ");
     Serial.println(required_time);
 
+    /*incomingByte = Serial.read(RX_1);
+
+    // say what you got:
+    Serial.print("I received: ");
+    Serial.println(incomingByte, DEC);*/
+    
     if (max_value < required_time) {
       max_value = required_time;
       max_digit = k;
@@ -275,13 +338,13 @@ void send_256_bytes() {
 
 void reset_target() {
   MODE::program();
-  DELAY::ms(300);
+  DELAY::ms<300>();
   RST::off();
-  DELAY::ms(300);
+  DELAY::ms<300>();
   RST::on();
-  DELAY::ms(300);
+  DELAY::ms<300>();
   VDD::off();
-  DELAY::ms(400);
+  DELAY::ms<400>();
 }
 
 /*void bootload_target() {
@@ -321,14 +384,16 @@ void reset_target() {
 
 void setup() {
   Serial.begin(UART::PC_BAUD);
-  targetSerial.begin(UART::RNS8_BAUD);
-  DELAY::init();
+  //targetSerial.begin(UART::RNS8_BAUD);
+  //DELAY::init();
 
   pinMode(HW::MODE, OUTPUT);
   pinMode(HW::RESET, OUTPUT);
   pinMode(HW::VDD_SWICH, OUTPUT);
   pinMode(HW::BUTTON, INPUT);
   pinMode(HW::RX_1, INPUT_PULLUP);
+  pinMode(HW::TX_1, OUTPUT);
+  digitalWrite(HW::TX_1, HIGH);
 }
 
 void loop() {
@@ -338,7 +403,7 @@ void loop() {
     ;
 
   Serial.println("Start of process");
-  DELAY::ms(400);
+  DELAY::ms<400>();
 
   //bootload_target();
   send_256_bytes();
