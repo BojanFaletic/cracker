@@ -21,7 +21,7 @@ constexpr uint8_t VDD_SWICH = 5;
 constexpr uint8_t RX_1 = 3;
 constexpr uint8_t TX_1 = 9;
 constexpr uint8_t BLANK = 12;
-constexpr uint8_t BUTTON = 11;
+constexpr uint8_t BUTTON = 6;
 
 } // namespace HW
 int incomingByte = 0;
