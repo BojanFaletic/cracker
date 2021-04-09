@@ -90,7 +90,7 @@ void _clear() {
 
 template <int duration_us> void us() { _delay_us(duration_us); }
 
-template <int duration_ms> void ms() { _delay_us(duration_ms) }
+template <int duration_ms> void ms() { _delay_ms(duration_ms); }
 
 template <int duration_ns> void ns() {
   constexpr int tick_ns = (1e9 / F_CPU);
@@ -147,12 +147,12 @@ void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
   // Count to value
-  OCR2A = 0xff;
+  OCR2A = 255;
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
   // Output to pin, 1024 prescaller
-  TCCR2B = 1 << 7 | 0b111 << 0;
+  TCCR2B = 0b010 << 0;
 }
 
 
@@ -165,7 +165,7 @@ void send_bit(bool bit_value) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = 1e6 / UART::PC_BAUD;
+  constexpr uint16_t delay = (1e6 / UART::PC_BAUD) * 16;
   for (int i = 0; i < 10; i++) {
     // Wait before sending bit
     _delay_us(delay);
@@ -208,8 +208,8 @@ uint16_t send_1byte(uint8_t key) {
 
   // TEST 123
 
-  softuart_putchar(40);
   softuart_putchar(key);
+  softuart_putchar(zero);
 
   softuart_putchar(zero);
   softuart_putchar(zero);
@@ -243,8 +243,8 @@ void send_256_bytes() {
     DELAY::ms<400>();
     RST::on();
 
-    DELAY::ms<217>();
-    DELAY::us<310>();
+    DELAY::ms<300>();
+    //DELAY::us<310>();
     // DELAY::ns<350>();
 
     uint16_t required_time = send_1byte(k);
@@ -282,6 +282,7 @@ void setup() {
   Serial.begin(UART::PC_BAUD);
 
   pinMode(HW::MODE, OUTPUT);
+  pinMode(HW::BUTTON, INPUT); 
   pinMode(HW::RESET, OUTPUT);
   pinMode(HW::VDD_SWICH, OUTPUT);
   pinMode(HW::CLK, OUTPUT);
