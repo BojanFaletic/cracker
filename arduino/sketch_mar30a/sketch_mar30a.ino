@@ -101,7 +101,8 @@ template <int duration_ns> void ns() {
 } // namespace DELAY
 
 namespace INT {
-static uint16_t noOfTicks;
+static uint32_t noOfTicks = 0;
+static uint8_t overflow_cnt = 0;
 void stop();
 
 void startTimer1() {
@@ -111,13 +112,23 @@ void startTimer1() {
   TCCR1A = 0x00;
   // Set timer to normal mode and set prescaler to 1.
   TCCR1B = 0x01;
+  // Enable interrupt on overflow
+  TIMSK1 = 0x01;
 }
 
-void stopTimer1() { TCCR1B = 0x00; }
+ISR(TIMER0_OVF_vect) { overflow_cnt++; }
+
+void stopTimer1() {
+  // Set prescaler to 0, disable interrupt
+  TCCR1B = 0x00;
+  TIMSK1 = 0x01;
+}
 
 uint16_t getTimerTicks() { return TCNT1; }
 
 void start() {
+  overflow_cnt = 0;
+  noOfTicks = 0;
   startTimer1();
   while (digitalRead(HW::RX_1))
     ;
@@ -126,7 +137,7 @@ void start() {
 
 void stop() {
   stopTimer1();
-  noOfTicks = getTimerTicks();
+  noOfTicks = ((uint32_t)(overflow_cnt) << 16) + ((uint32_t)(getTimerTicks()));
 }
 
 } // namespace INT
@@ -179,7 +190,7 @@ void softuart_putchar(char ch) {
 }
 /////////////////////////////////////////////////////////////
 
-uint16_t send_1byte(uint8_t key) {
+uint32_t send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
 
   for (uint16_t i = 0; i < 16; i++) {
@@ -219,7 +230,7 @@ uint16_t send_1byte(uint8_t key) {
 }
 
 void send_256_bytes() {
-  uint16_t max_value = 0;
+  uint32_t max_value = 0;
   uint16_t max_digit = 0;
   for (uint16_t k = 0; k < 256; k++) {
 
@@ -236,7 +247,7 @@ void send_256_bytes() {
     // DELAY::us<310>();
     // DELAY::ns<350>();
 
-    uint16_t required_time = send_1byte(k);
+    uint32_t required_time = send_1byte(k);
 
     Serial.print("Sending: ");
     Serial.print(k);
@@ -280,6 +291,7 @@ void setup() {
   digitalWrite(HW::TX_1, HIGH);
 
   start_PWM();
+  sei();
 }
 
 void loop() {
