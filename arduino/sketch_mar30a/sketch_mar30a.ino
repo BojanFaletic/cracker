@@ -160,28 +160,22 @@ void send_bit(bool bit_value) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD) * 16)*2;
-  for (int i = 0; i < 10; i++) {
-    // Wait before sending bit
+  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD) * 16) * 2;
+  // Start bit
+  send_bit(0);
+  _delay_us(delay);
+
+  for (int i = 0; i < 8; i++) {
+    // Send 8 bits of data
+    bool value = ch & 0x01;
+    ch >>= 1;
+    send_bit(value);
     _delay_us(delay);
-
-    // Start bit
-    if (i == 0) {
-      send_bit(0);
-      continue;
-    }
-
-    if (i < 9) {
-      // Send 8 bits of data
-      bool value = ch & 0x01;
-      ch >>= 1;
-      send_bit(value);
-      continue;
-    }
-
-    // Stop bit
-    send_bit(1);
   }
+
+  // Stop bit
+  send_bit(1);
+  _delay_us(delay);
 }
 /////////////////////////////////////////////////////////////
 
@@ -290,8 +284,6 @@ void setup() {
 
 void loop() {
 
-  
-  
   Serial.println("Press button to start cracking process.");
 
   while (digitalRead(HW::BUTTON) == HIGH)
