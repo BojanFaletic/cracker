@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h>
+#include <avr/delay.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdint.h>
@@ -86,77 +86,27 @@ void _clear() {
   TCNT2 = 0x00;
   counter_ov_cnt = 0;
 }
-/*void _overflow_int() { TIMSK2 = 0x01; }
 
-void init() {
-  _stop();
-  _clear();
-  _overflow_int();
-  sei();
-}*/
+template <int duration_us> void us() { _delay_us(duration_us); }
 
-/*void _delay(uint32_t ticks) {
-  counter_ov_cnt = 0;
-  _clear();
-  _start();
-  auto cnt_ticks = []() {
-    return (counter_ov_cnt << 8) | static_cast<uint32_t>(TCNT2);
+template <int duration_ms> void ms() { _delay_us(duration_ms) }
+
+template <int duration_ns> void ns() {
+  constexpr int tick_ns = (1e9 / F_CPU);
+  constexpr int ticks_low = duration_ns / tick_ns;
+  constexpr int ticks_high = (duration_ns + 1) / tick_ns;
+  constexpr int ring = duration_ns % tick_ns;
+  constexpr int ticks = (ring < tick_ns / 2) ? ticks_low : ticks_high;
+
+  for (int i = 0; i < ticks; i++) {
+    asm volatile("nop");
   }
-  uint32_t counter_value = cnt_ticks();
-
-
-
-  while (cnt_ticks() < ticks) {
-    counter_value = cnt_ticks();
-
-  }
-
-  _stop();
-}*/
-
-/*void ns(uint32_t duration_ns) {
-  constexpr uint32_t ns_to_ticks = ((1e9 / F_CPU)*2);
-  uint32_t ticks = duration_ns / ns_to_ticks;
-  _delay(ticks);
-}*/
-
-template<int duration_us>
-void us() {
- delayMicroseconds(duration_us);
 }
-
-template<int duration_ms>
-void ms() {
-  delay(duration_ms);
-}
-
-    template<int duration_ns>
-    void ns(){
-        constexpr int tick_ns = (1e9/F_CPU);
-        constexpr int ticks_low = duration_ns/tick_ns;
-        constexpr int ticks_high = (duration_ns+1)/tick_ns;
-        constexpr int ring = duration_ns % tick_ns;
-        constexpr int ticks = (ring < tick_ns/2) ? ticks_low : ticks_high;
-        
-        for (int i=0; i<ticks; i++){
-            asm volatile ("nop");
-        }
-    }
-
-
-/*void s(uint8_t duration_s) {
-  constexpr uint32_t s_to_ms = 1000;
-  constexpr uint32_t max_value = static_cast<uint32_t>(-1);
-  uint32_t duration = static_cast<uint32_t>(duration_s);
-  uint32_t d_ms =
-      (duration < max_value - s_to_ms) ? duration * s_to_ms : max_value;
-  ms(d_ms);
-}*/
 
 } // namespace DELAY
 
 // timer 2 overflow
-ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt ++ ; }
+ISR(TIMER2_OVF_vect) { DELAY::counter_ov_cnt++; }
 
 namespace INT {
 static uint16_t noOfTicks;
@@ -224,49 +174,36 @@ void softuart_putchar(char ch) {
 }
 /////////////////////////////////////////////////////////////
 
-
-
-SoftwareSerial targetSerial(HW::BLANK, HW::TX_1);
 uint16_t send_1byte(uint8_t key) {
   uint8_t zero = 0x00;
-
 
   for (uint16_t i = 0; i < 16; i++) {
     softuart_putchar(zero);
     DELAY::ms<30>();
   }
 
-
-
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
-  softuart_putchar(el);
+    softuart_putchar(el);
   }
 
   // send key
 
-
   // TEST 123
 
-
-  softuart_putchar(40); 
+  softuart_putchar(40);
   softuart_putchar(key);
- 
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  
-  
-   
- 
 
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  softuart_putchar(zero);
+  softuart_putchar(zero);
 
   // send query
   softuart_putchar(0x70);
-  
+
   // Start interrupt on falling edge
   INT::start();
 
@@ -274,8 +211,6 @@ uint16_t send_1byte(uint8_t key) {
   DELAY::ms<4>();
 
   return INT::noOfTicks;
-
-  
 }
 
 void send_256_bytes() {
@@ -283,7 +218,7 @@ void send_256_bytes() {
   uint16_t max_digit = 0;
   for (uint16_t k = 0; k < 256; k++) {
 
-/*reset po vsakem poslanem filu*/
+    /*reset po vsakem poslanem filu*/
     DELAY::ms<100>();
     VDD::off();
     RST::off();
@@ -292,28 +227,11 @@ void send_256_bytes() {
     DELAY::ms<300>();
     RST::on();
 
-    
     DELAY::ms<217>();
     DELAY::us<310>();
-    //DELAY::ns<350>();
-    
-    
+    // DELAY::ns<350>();
+
     uint16_t required_time = send_1byte(k);
-
-    // reset after sending
-
-    /*DELAY::ms(100);
-    RST::off();
-    DELAY::ms(200);
-    RST::on();
-    DELAY::ms(300);
-    VDD::off();
-    DELAY::ms(200);
-    VDD::on();
-    DELAY::ms(300);
-    //DELAY::us(55);*/
-
-
 
 
     Serial.print("Sending: ");
@@ -321,12 +239,7 @@ void send_256_bytes() {
     Serial.print(" required time: ");
     Serial.println(required_time);
 
-    /*incomingByte = Serial.read(RX_1);
 
-    // say what you got:
-    Serial.print("I received: ");
-    Serial.println(incomingByte, DEC);*/
-    
     if (max_value < required_time) {
       max_value = required_time;
       max_digit = k;
@@ -347,36 +260,6 @@ void reset_target() {
   DELAY::ms<400>();
 }
 
-/*void bootload_target() {
-  // Start
-  VDD::on();
-  DELAY::ms(300);
-  RST::on();
-  DELAY::ms(300);
-  MODE::program();
-  DELAY::ms(300);
-
-  // We send R8C to normall working.
-
-  RST::off();
-  DELAY::ms(300);
-  RST::on();
-  DELAY::ms(500);
-  VDD::off();
-
-  DELAY::ms(1000);
-
-  // We send R8C to bootloader.
-  VDD::on();
-  DELAY::ms(300);
-  MODE::bootloader();
-  DELAY::ms(300);
-  RST::off();
-  DELAY::ms(200);
-  RST::on();
-  DELAY::ms(0);
-  //DELAY::us(330);
-}*/
 
 ////////////////////////////////////////////////////////////////////
 /////////////////////////// ARDUINO ////////////////////////////////
@@ -384,8 +267,8 @@ void reset_target() {
 
 void setup() {
   Serial.begin(UART::PC_BAUD);
-  //targetSerial.begin(UART::RNS8_BAUD);
-  //DELAY::init();
+  // targetSerial.begin(UART::RNS8_BAUD);
+  // DELAY::init();
 
   pinMode(HW::MODE, OUTPUT);
   pinMode(HW::RESET, OUTPUT);
@@ -405,7 +288,7 @@ void loop() {
   Serial.println("Start of process");
   DELAY::ms<400>();
 
-  //bootload_target();
+  // bootload_target();
   send_256_bytes();
   reset_target();
 
