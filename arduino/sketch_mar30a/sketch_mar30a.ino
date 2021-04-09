@@ -116,7 +116,7 @@ void startTimer1() {
   TIMSK1 = 0x01;
 }
 
-ISR(TIMER0_OVF_vect) { overflow_cnt++; }
+ISR(TIMER1_OVF_vect) { overflow_cnt++; }
 
 void stopTimer1() {
   // Set prescaler to 0, disable interrupt
@@ -297,6 +297,9 @@ void setup() {
 void loop() {
 
   Serial.println("Press button to start cracking process.");
+
+  // Disable power
+  VDD::off();
 
   while (digitalRead(HW::BUTTON) == HIGH)
     ;
