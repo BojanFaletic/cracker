@@ -188,6 +188,27 @@ void softuart_putchar(char ch) {
   send_bit(1);
   _delay_us(delay);
 }
+
+void softuart_putchar_2(char ch) {
+  constexpr uint16_t delay = (((1e6 / 115200) * 16) * 4);
+  // Start bit
+  send_bit(0);
+  _delay_us(delay);
+
+  for (int i = 0; i < 8; i++) {
+    // Send 8 bits of data
+    bool value = ch & 0x01;
+    ch >>= 1;
+    send_bit(value);
+    _delay_us(delay);
+  }
+
+  // Stop bit
+  send_bit(1);
+  _delay_us(delay);
+}
+
+
 /////////////////////////////////////////////////////////////
 
 uint32_t send_1byte(uint8_t key) {
@@ -195,29 +216,46 @@ uint32_t send_1byte(uint8_t key) {
 
   for (uint16_t i = 0; i < 16; i++) {
     softuart_putchar(0x00);
-    DELAY::ms<25>();
+    DELAY::ms<80>();
   }
 
+  
+  //softuart_putchar_1(0xB0);
+  //DELAY::ms<>(100);
+  softuart_putchar(0xB4);
+  DELAY::ms<500>();
+  
   // send header
-  const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
+  const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x00};
   for (uint8_t el : header) {
-    softuart_putchar(el);
+    //softuart_putchar(el);
+    softuart_putchar_2(el);
   }
 
   // send key
 
   // TEST 123
 
-  softuart_putchar(key);
+  /*softuart_putchar(key);
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
-  softuart_putchar(zero);
+  softuart_putchar(zero);*/
+  
+  softuart_putchar_2(key);
+  softuart_putchar_2(zero);
+  softuart_putchar_2(zero);
+  softuart_putchar_2(zero);
+  softuart_putchar_2(zero);
+  softuart_putchar_2(zero);
+  softuart_putchar_2(zero);
+  
 
   // send query
-  softuart_putchar(0x70);
+  //softuart_putchar(0x70);
+  softuart_putchar_2(0x70);
 
   // Start interrupt on falling edge
   INT::start();
@@ -231,7 +269,7 @@ uint32_t send_1byte(uint8_t key) {
 void send_256_bytes() {
   uint32_t max_value = 0;
   uint16_t max_digit = 0;
-  for (uint16_t k = 10; k < 256; k++) {
+  for (uint16_t k =0; k < 256; k++) {
 
     /*reset po vsakem poslanem filu*/
     DELAY::ms<300>();
