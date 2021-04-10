@@ -201,14 +201,12 @@ uint32_t send_1byte(uint8_t key) {
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
-   softuart_putchar(el);
+    softuart_putchar(el);
   }
 
   // send key
 
   // TEST 123
-
-  
 
   softuart_putchar(key);
   softuart_putchar(zero);
@@ -217,9 +215,7 @@ uint32_t send_1byte(uint8_t key) {
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
- 
- 
-  
+
   // send query
   softuart_putchar(0x70);
 
@@ -247,7 +243,7 @@ void send_256_bytes() {
     RST::on();
 
     DELAY::ms<400>();
-    //DELAY::us<330>();
+    // DELAY::us<330>();
     // DELAY::ns<350>();
 
     uint32_t required_time = send_1byte(k);
@@ -255,7 +251,10 @@ void send_256_bytes() {
     Serial.print("Sending: ");
     Serial.print(k);
     Serial.print(" required time: ");
-    Serial.println(required_time);
+
+    double ms_time = ((double)required_time) / ((double)F_CPU);
+    Serial.print(ms_time);
+    Serial.println(" ms");
 
     if (max_value < required_time) {
       max_value = required_time;
@@ -303,6 +302,12 @@ void loop() {
 
   // Disable power
   VDD::off();
+
+  // reset counter
+  INT::startTimer1();
+  INT::noOfTicks = 0;
+  INT::overflow_cnt = 0;
+  INT::stopTimer1();
 
   while (digitalRead(HW::BUTTON) == HIGH)
     ;
