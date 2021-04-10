@@ -101,8 +101,8 @@ template <int duration_ns> void ns() {
 } // namespace DELAY
 
 namespace INT {
-static uint32_t noOfTicks = 0;
-static uint8_t overflow_cnt = 0;
+volatile static uint32_t noOfTicks = 0;
+volatile static uint8_t overflow_cnt = 0;
 void stop();
 
 void startTimer1() {
@@ -116,7 +116,7 @@ void startTimer1() {
   TIMSK1 = 0x01;
 }
 
-ISR(TIMER0_OVF_vect) { overflow_cnt++; }
+ISR(TIMER1_OVF_vect) { overflow_cnt++; }
 
 void stopTimer1() {
   // Set prescaler to 0, disable interrupt
@@ -149,12 +149,12 @@ void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
   // Count to value
-  OCR2A = 1;
+  OCR2A = 3;
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
   // Output to pin, 8 prescaller (1 MHZ)
-  TCCR2B = 0b010 << 0;
+  TCCR2B = 0b10 << 0;
 }
 
 void stop_PWM() {
@@ -171,7 +171,7 @@ void send_bit(bool bit_value) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD) * 16) * 2;
+  constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 16) * 4);
   // Start bit
   send_bit(0);
   _delay_us(delay);
@@ -191,32 +191,35 @@ void softuart_putchar(char ch) {
 /////////////////////////////////////////////////////////////
 
 uint32_t send_1byte(uint8_t key) {
-  uint8_t zero = 0x00;
+  uint8_t zero = 0xFF;
 
   for (uint16_t i = 0; i < 16; i++) {
-    softuart_putchar(zero);
-    DELAY::ms<30>();
+    softuart_putchar(0x00);
+    DELAY::ms<25>();
   }
 
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
-    softuart_putchar(el);
+   softuart_putchar(el);
   }
 
   // send key
 
   // TEST 123
 
+  
+
   softuart_putchar(key);
   softuart_putchar(zero);
-
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
-
+ 
+ 
+  
   // send query
   softuart_putchar(0x70);
 
@@ -232,7 +235,7 @@ uint32_t send_1byte(uint8_t key) {
 void send_256_bytes() {
   uint32_t max_value = 0;
   uint16_t max_digit = 0;
-  for (uint16_t k = 0; k < 256; k++) {
+  for (uint16_t k = 10; k < 256; k++) {
 
     /*reset po vsakem poslanem filu*/
     DELAY::ms<300>();
@@ -243,8 +246,8 @@ void send_256_bytes() {
     DELAY::ms<400>();
     RST::on();
 
-    DELAY::ms<300>();
-    // DELAY::us<310>();
+    DELAY::ms<400>();
+    //DELAY::us<330>();
     // DELAY::ns<350>();
 
     uint32_t required_time = send_1byte(k);
