@@ -252,7 +252,7 @@ void send_256_bytes() {
     Serial.print(k);
     Serial.print(" required time: ");
 
-    double ms_time = ((double)required_time) / ((double)F_CPU);
+    double ms_time = ((double)required_time) / ((double)(F_CPU/1000));
     Serial.print(ms_time);
     Serial.println(" ms");
 
