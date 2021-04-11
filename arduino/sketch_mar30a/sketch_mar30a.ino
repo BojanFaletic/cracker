@@ -149,12 +149,12 @@ void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
   // Count to value
-  OCR2A = 3;
+  OCR2A = 31;
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
   // Output to pin, 8 prescaller (1 MHZ)
-  TCCR2B = 0b10 << 0;
+  TCCR2B = 0b1 << 0;
 }
 
 void stop_PWM() {
@@ -212,21 +212,21 @@ void softuart_putchar_2(char ch) {
 /////////////////////////////////////////////////////////////
 
 uint32_t send_1byte(uint8_t key) {
-  uint8_t zero = 0xFF;
+  uint8_t zero = 0x00;
 
   for (uint16_t i = 0; i < 16; i++) {
-    softuart_putchar(0x00);
-    DELAY::ms<80>();
+    softuart_putchar(zero);
+    DELAY::ms<200>();
   }
 
-  
-  //softuart_putchar_1(0xB0);
-  //DELAY::ms<>(100);
+  DELAY::ms<200>();
+  softuart_putchar(0xB0);
+  DELAY::ms<400>();
   softuart_putchar(0xB4);
-  DELAY::ms<500>();
+  DELAY::ms<400>();
   
   // send header
-  const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x00};
+  const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
     //softuart_putchar(el);
     softuart_putchar_2(el);
@@ -236,7 +236,7 @@ uint32_t send_1byte(uint8_t key) {
 
   // TEST 123
 
-  /*softuart_putchar(key);
+  /*softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);
@@ -255,6 +255,7 @@ uint32_t send_1byte(uint8_t key) {
 
   // send query
   //softuart_putchar(0x70);
+  //DELAY::ms<200>();
   softuart_putchar_2(0x70);
 
   // Start interrupt on falling edge
@@ -271,18 +272,43 @@ void send_256_bytes() {
   uint16_t max_digit = 0;
   for (uint16_t k =0; k < 256; k++) {
 
-    /*reset po vsakem poslanem filu*/
-    DELAY::ms<300>();
-    VDD::off();
+    // Normal working
+    DELAY::ms<400>();
+    VDD::on();
+    RST::on();
+    MODE::program();
+    DELAY::ms<600>();
     RST::off();
+    DELAY::ms<400>();
+    RST::on();
+    DELAY::ms<600>();
+
+    // Bootloader working
+    RST::off();
+    DELAY::ms<400>();
+    VDD::off();
     DELAY::ms<1000>();
     VDD::on();
     DELAY::ms<400>();
     RST::on();
 
+    // Delay to first digit
+    DELAY::ms<1500>();
+
+    
+    /*MODE::program();
     DELAY::ms<400>();
+    VDD::off();
+    DELAY::ms<500>();
+    RST::off();
+    DELAY::ms<700>();
+    VDD::on();
+    DELAY::ms<200>();
+    RST::on();
+
+    DELAY::ms<700>();
     // DELAY::us<330>();
-    // DELAY::ns<350>();
+    // DELAY::ns<350>();*/
 
     uint32_t required_time = send_1byte(k);
 
@@ -292,7 +318,8 @@ void send_256_bytes() {
 
     double ms_time = ((double)required_time) / ((double)(F_CPU/1000));
     Serial.print(ms_time);
-    Serial.println(" ms");
+    Serial.print(" ms  ");
+    Serial.println(required_time);
 
     if (max_value < required_time) {
       max_value = required_time;
@@ -303,16 +330,6 @@ void send_256_bytes() {
   Serial.println(max_digit);
 }
 
-void reset_target() {
-  MODE::program();
-  DELAY::ms<300>();
-  RST::off();
-  DELAY::ms<300>();
-  RST::on();
-  DELAY::ms<300>();
-  VDD::off();
-  DELAY::ms<400>();
-}
 
 ////////////////////////////////////////////////////////////////////
 /////////////////////////// ARDUINO ////////////////////////////////
@@ -350,15 +367,10 @@ void loop() {
   while (digitalRead(HW::BUTTON) == HIGH)
     ;
 
-  Serial.println("Start of process");
-  DELAY::ms<400>();
+  while (1) {
+    send_256_bytes();
 
-  // bootload_target();
-  send_256_bytes();
-  reset_target();
+    Serial.println("***********************************************"); 
+  }
 
-  Serial.println("End of process");
-
-  while (1)
-    ;
 }
