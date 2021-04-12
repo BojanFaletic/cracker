@@ -46,8 +46,8 @@ def main(f_name='arduino/putty_output.log'):
     average_data = np.array([process_dict[i][2] for i in range(256)])
     std_data = np.array([process_dict[i][3] for i in range(256)])
 
-    bottom_interval = average_data - 2*std_data
-    upper_interval = average_data + 2*std_data
+    bottom_interval = average_data - 1*std_data
+    upper_interval = average_data + 1*std_data
 
     # Divination
     plt.plot(t, std_data)
