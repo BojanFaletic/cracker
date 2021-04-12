@@ -55,9 +55,8 @@ def main(f_name='arduino/putty_output.log'):
         items_in_batch = [digit_ms[i][batch] for i in range(256)]
         max_digit = np.argmax(items_in_batch)
         max_digit_value = items_in_batch[max_digit]
-        print(f'''Divination per batch: {std:.4f}, max digit: {max_digit},\
-             with value: {max_digit_value} ms''')
-
+        print(f'''Divination per batch {batch}: {std:.4f}, \
+            max digit: {max_digit}, with value: {max_digit_value} ms''')
 
     # Plot results
     t = np.arange(256)
