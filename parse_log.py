@@ -52,6 +52,9 @@ def main(f_name='arduino/putty_output.log'):
             score_board_max[i] += 1 if digit_ms[i][batch] > max_th else 0
             score_board_min[i] += 1 if digit_ms[i][batch] < min_th else 0
 
+        print("diviation for: ", std)
+       
+
     # Plot results
     t = np.arange(256)
     plt.plot(t, score_board_max, 'r')
