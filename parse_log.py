@@ -18,16 +18,48 @@ def main(f_name='arduino/putty_output.log'):
         digit_ms[i] = []
         digit_ticks[i] = []
 
+    # Tracking items in current batch
+    is_batch_valid = False
+    line_counter = 0
+    batch_idx = 0
+    incomplete_batch_ms = {}
+    incomplete_batch_ticks = {}
+
     while line := file.readline():
+        line_counter += 1
         if 'Sending' in line:
             # template = 'Sending: 14 required time: 30.17 ms  1475989'
             digit = int(re.findall('Sending: (\d*)', line)[0])
             ms_time = float(re.findall('(\d*\.\d*) ms', line)[0])
             tick_time = float(re.findall('  (\d*)', line)[0])
 
-            # Add time to list
-            digit_ms[digit].append(ms_time)
-            digit_ticks[digit].append(tick_time)
+            # Start of batch
+            if digit == 0:
+                batch_idx = 0
+                is_batch_valid = True
+                incomplete_batch_ms.clear()
+                incomplete_batch_ticks.clear()
+
+            # Save times to array
+            incomplete_batch_ms[digit] = ms_time
+            incomplete_batch_ticks[digit] = tick_time
+
+            if not is_batch_valid:
+                continue
+
+            # Drop batch because data is incomplete
+            if (digit != batch_idx):
+                print(f'''Discarding batch: {digit} != {batch_idx}, \
+                    line number: {line_counter}''')
+                is_batch_valid = False
+                continue
+            batch_idx += 1
+
+            # Batch is finished add to list of samples
+            if (digit == 255):
+                for i in range(256):
+                    digit_ms[i].append(incomplete_batch_ms[i])
+                    digit_ticks[i].append(incomplete_batch_ticks[i])
 
     # Process data
     process_dict = {}
@@ -57,7 +89,7 @@ def main(f_name='arduino/putty_output.log'):
         max_digit = np.argmax(items_in_batch_ticks)
         max_digit_ms = digit_ms[max_digit][batch]
 
-        print(f'''Diviation per batch {batch}: {std:.4f}, \
+        print(f'''Deviation per batch {batch}: {std:.4f}, \
             max digit: {max_digit}, with value: {max_digit_ms} ms''')
 
     # Plot results
