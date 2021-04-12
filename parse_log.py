@@ -39,6 +39,28 @@ def main(f_name='arduino/putty_output.log'):
 
         process_dict[i] = [min_ms, max_ms, average_ms, std]
 
+    # Find candate of each passing
+    score_board_max = np.zeros(256)
+    score_board_min = np.zeros(256)
+    for batch in range(len(digit_ms[255])):
+        std = np.std([digit_ms[i][batch] for i in range(256)])
+        average = np.mean([digit_ms[i][batch] for i in range(256)])
+
+        min_th = average - std
+        max_th = average + std
+        for i in range(256):
+            score_board_max[i] += 1 if digit_ms[i][batch] > max_th else 0
+            score_board_min[i] += 1 if digit_ms[i][batch] < min_th else 0
+
+    # Plot results
+    t = np.arange(256)
+    plt.plot(t, score_board_max, 'r')
+    plt.plot(t, score_board_min, 'b')
+    plt.xlabel('Digit [n]')
+    plt.ylabel('Pass threshold [n]')
+    plt.legend(['Max'], ['Min'])
+    plt.plot()
+
     # Plot data
     t = np.arange(256)
     min_data = np.array([process_dict[i][0] for i in range(256)])
@@ -49,11 +71,13 @@ def main(f_name='arduino/putty_output.log'):
     bottom_interval = average_data - 1*std_data
     upper_interval = average_data + 1*std_data
 
+    '''
     # Divination
     plt.plot(t, std_data)
     plt.xlabel('Digits [n]')
     plt.ylabel('Divination [ms]')
     plt.show()
+    '''
 
     # Summary
     plt.plot(t, min_data, t, max_data, t, average_data)
