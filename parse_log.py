@@ -59,7 +59,7 @@ def main(f_name='arduino/putty_output.log'):
     plt.xlabel('Digit [n]')
     plt.ylabel('Pass threshold [n]')
     plt.legend(['Max'], ['Min'])
-    plt.plot()
+    plt.show()
 
     # Plot data
     t = np.arange(256)
