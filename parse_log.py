@@ -100,8 +100,8 @@ def main(f_name='arduino/putty_output.log'):
 
     # Plot results
     t = np.arange(256)
-    plt.bar(t, score_board_max, 'r')
-    plt.bar(t, score_board_min, 'b')
+    plt.bar(t, score_board_max)
+    plt.bar(t, score_board_min)
     plt.xlabel('Digit [n]')
     plt.ylabel('Pass threshold [n]')
     plt.show()
