@@ -52,11 +52,13 @@ def main(f_name='arduino/putty_output.log'):
             score_board_max[i] += 1 if digit_ms[i][batch] > max_th else 0
             score_board_min[i] += 1 if digit_ms[i][batch] < min_th else 0
 
-        items_in_batch = [digit_ms[i][batch] for i in range(256)]
-        max_digit = np.argmax(items_in_batch)
-        max_digit_value = items_in_batch[max_digit]
-        print(f'''Divination per batch {batch}: {std:.4f}, \
-            max digit: {max_digit}, with value: {max_digit_value} ms''')
+        # Print summary
+        items_in_batch_ticks = [digit_ticks[i][batch] for i in range(256)]
+        max_digit = np.argmax(items_in_batch_ticks)
+        max_digit_ms = digit_ms[max_digit][batch]
+
+        print(f'''Diviation per batch {batch}: {std:.4f}, \
+            max digit: {max_digit}, with value: {max_digit_ms} ms''')
 
     # Plot results
     t = np.arange(256)
