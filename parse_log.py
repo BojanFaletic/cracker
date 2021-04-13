@@ -1,6 +1,7 @@
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
 
 
 def main(f_name='arduino/putty_output.log'):
@@ -49,7 +50,7 @@ def main(f_name='arduino/putty_output.log'):
 
             # Drop batch because data is incomplete
             if (digit != batch_idx):
-                print(f'''Discarding batch: {digit} != {batch_idx}, \
+                logging.warning(f'''Discarding batch: {digit} != {batch_idx}, \
                     line number: {line_counter}''')
                 is_batch_valid = False
                 continue
@@ -65,7 +66,7 @@ def main(f_name='arduino/putty_output.log'):
                 incomplete_batch_ticks.clear()
 
     if (len(incomplete_batch_ms) != 0):
-        print('Last batch is not included (incomplete data)')
+        logging.warning('Last batch is not included (incomplete data)')
 
     # Process data
     process_dict = {}
