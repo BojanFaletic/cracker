@@ -81,14 +81,14 @@ def main(f_name='arduino/putty_output.log'):
     score_board_max = np.zeros(256)
     score_board_min = np.zeros(256)
     for batch in range(len(digit_ms[255])):
-        std = np.std([digit_ms[i][batch] for i in range(256)])
-        average = np.mean([digit_ms[i][batch] for i in range(256)])
+        std = np.std([digit_ticks[i][batch] for i in range(256)])
+        average = np.mean([digit_ticks[i][batch] for i in range(256)])
 
         min_th = average - std
         max_th = average + std
         for i in range(256):
-            score_board_max[i] += 1 if digit_ms[i][batch] > max_th else 0
-            score_board_min[i] += 1 if digit_ms[i][batch] < min_th else 0
+            score_board_max[i] += 1 if digit_ticks[i][batch] > max_th else 0
+            score_board_min[i] += 1 if digit_ticks[i][batch] < min_th else 0
 
         # Print summary
         items_in_batch_ticks = [digit_ticks[i][batch] for i in range(256)]
