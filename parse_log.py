@@ -64,7 +64,7 @@ def main(f_name='arduino/putty_output.log'):
                 incomplete_batch_ms.clear()
                 incomplete_batch_ticks.clear()
 
-    if (len(incomplete_batch_ms) != 0 and is_batch_valid):
+    if (len(incomplete_batch_ms) != 0):
         print('Last batch is not included (incomplete data)')
 
     # Process data
