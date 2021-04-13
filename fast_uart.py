@@ -8,7 +8,7 @@ from time import sleep
 ser = Serial('COM3', 9600)
 ser.close()
 
-for key in range(256):
+for key in range(255, 0, -1):
     ser.open()
     sleep(0.02)
      # send 16 zeros
@@ -24,12 +24,12 @@ for key in range(256):
     # key
     
     ser.write(bytes([key]))
-    ser.write(b'\x00')
-    ser.write(b'\x00')
-    ser.write(b'\x00')
-    ser.write(b'\x00')
-    ser.write(b'\x00')
-    ser.write(b'\x00')
+    ser.write(b'\xff')
+    ser.write(b'\xff')
+    ser.write(b'\xff')
+    ser.write(b'\xff')
+    ser.write(b'\xff')
+    ser.write(b'\xff')
     # read
     ser.write(b'\x70')
     ser.flush()
