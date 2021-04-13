@@ -212,18 +212,23 @@ void softuart_putchar_2(char ch) {
 /////////////////////////////////////////////////////////////
 
 uint32_t send_1byte(uint8_t key) {
-  uint8_t zero = 0x00;
+  uint8_t zero = 0xFF;
 
   for (uint16_t i = 0; i < 16; i++) {
-    softuart_putchar(zero);
-    DELAY::ms<200>();
+    softuart_putchar(0X00);
+    DELAY::ms<700>();
   }
 
-  DELAY::ms<200>();
+  //DELAY::ms<1000>();
   softuart_putchar(0xB0);
-  DELAY::ms<400>();
+  DELAY::ms<800>();
   softuart_putchar(0xB4);
-  DELAY::ms<400>();
+  DELAY::ms<800>();
+  softuart_putchar_2(0x50);
+  softuart_putchar_2(0x70);
+  DELAY::ms<600>();
+  softuart_putchar_2(0x70);
+  DELAY::ms<800>();
   
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
@@ -251,7 +256,6 @@ uint32_t send_1byte(uint8_t key) {
   softuart_putchar_2(zero);
   softuart_putchar_2(zero);
   softuart_putchar_2(zero);
-  
 
   // send query
   //softuart_putchar(0x70);
@@ -270,7 +274,7 @@ uint32_t send_1byte(uint8_t key) {
 void send_256_bytes() {
   uint32_t max_value = 0;
   uint16_t max_digit = 0;
-  for (uint16_t k =0; k < 256; k++) {
+  for (int k =0; k <255 ; k++) {
 
     // Normal working
     DELAY::ms<400>();
