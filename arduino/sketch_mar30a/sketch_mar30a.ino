@@ -300,9 +300,9 @@ void send_256_bytes() {
     RST::off();
     DELAY::ms<700>();
     VDD::off();
-    DELAY::ms<2000>();
+    DELAY::ms<2500>();
     VDD::on();
-    DELAY::ms<1000>();
+    DELAY::ms<1500>();
     RST::on();
     
     // Delay to first digit
