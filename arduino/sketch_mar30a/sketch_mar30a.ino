@@ -149,7 +149,7 @@ void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
   // Count to value
-  OCR2A = 31;
+  OCR2A = 11;
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
@@ -171,7 +171,8 @@ void send_bit(bool bit_value) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 16) * 4);
+  //constexpr uint16_t delay = (1e6 / UART::PC_BAUD);
+  constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 2) * 12);
   // Start bit
   send_bit(0);
   _delay_us(delay);
@@ -190,7 +191,8 @@ void softuart_putchar(char ch) {
 }
 
 void softuart_putchar_2(char ch) {
-  constexpr uint16_t delay = (((1e6 / 115200) * 16) * 4);
+ //constexpr uint16_t delay = (1e6 / 115200);
+ constexpr uint16_t delay = (((1e6 / 115200) * 2) * 12);
   // Start bit
   send_bit(0);
   _delay_us(delay);
@@ -214,22 +216,22 @@ void softuart_putchar_2(char ch) {
 uint32_t send_1byte(uint8_t key) {
   uint8_t zero = 0xFF;
 
-  for (uint16_t i = 0; i < 16; i++) {
+  for (uint16_t i = 0; i < 17; i++) {
     softuart_putchar(0X00);
-    DELAY::ms<700>();
+    DELAY::ms<200>();
   }
 
-  //DELAY::ms<1000>();
+
   softuart_putchar(0xB0);
-  DELAY::ms<800>();
+  DELAY::ms<900>();
   softuart_putchar(0xB4);
-  DELAY::ms<800>();
+  DELAY::ms<900>();
   softuart_putchar_2(0x50);
   softuart_putchar_2(0x70);
-  DELAY::ms<600>();
+  DELAY::ms<400>();
   softuart_putchar_2(0x70);
-  DELAY::ms<800>();
-  
+  DELAY::ms<400>();
+  //
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
@@ -259,7 +261,8 @@ uint32_t send_1byte(uint8_t key) {
 
   // send query
   //softuart_putchar(0x70);
-  //DELAY::ms<200>();
+  //DELAY::ms<2000>();
+  //softuart_putchar_2(0x75);
   softuart_putchar_2(0x70);
 
   // Start interrupt on falling edge
@@ -268,7 +271,13 @@ uint32_t send_1byte(uint8_t key) {
   // Delay for max timeout (4ms)
   DELAY::ms<4>();
 
+ DELAY::ms<2000>();
+  softuart_putchar_2(0x75);
+  softuart_putchar_2(0x70);
+  
   return INT::noOfTicks;
+
+  
 }
 
 void send_256_bytes() {
@@ -277,27 +286,27 @@ void send_256_bytes() {
   for (int k =0; k <255 ; k++) {
 
     // Normal working
-    DELAY::ms<400>();
+    DELAY::ms<700>();
     VDD::on();
     RST::on();
     MODE::program();
-    DELAY::ms<600>();
+    DELAY::ms<700>();
     RST::off();
     DELAY::ms<400>();
     RST::on();
-    DELAY::ms<600>();
+    DELAY::ms<700>();
 
     // Bootloader working
     RST::off();
-    DELAY::ms<400>();
+    DELAY::ms<700>();
     VDD::off();
-    DELAY::ms<1000>();
+    DELAY::ms<2000>();
     VDD::on();
-    DELAY::ms<400>();
+    DELAY::ms<1000>();
     RST::on();
-
+    
     // Delay to first digit
-    DELAY::ms<1500>();
+    DELAY::ms<1000>();
 
     
     /*MODE::program();
