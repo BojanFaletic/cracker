@@ -25,6 +25,7 @@ constexpr uint8_t TX_1 = 9;
 constexpr uint8_t BLANK = 12;
 constexpr uint8_t CLK = 11;
 constexpr uint8_t BUTTON = 6;
+constexpr uint8_t UART_CLK = 10;
 
 } // namespace HW
 int incomingByte = 0;
@@ -170,46 +171,45 @@ void send_bit(bool bit_value) {
   }
 }
 
-void softuart_putchar(char ch) {
-  //constexpr uint16_t delay = (1e6 / UART::PC_BAUD);
-  constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 2) * 12);
+void write_uart_clk(bool value) {
+  if (value) {
+    PORTB |= (1 << PINB2);
+  } else {
+    PORTB &= ~(1 << PINB2);
+  }
+}
+template <uint16_t delay> void uart_one_bit(bool bit) {
+  write_uart_clk(0);
+  _delay_us(delay / 2);
+  write_uart_clk(1);
+  send_bit(bit);
+  _delay_us(delay / 2);
+}
+
+template <uint16_t delay> void generic_uart(char ch) {
   // Start bit
-  send_bit(0);
-  _delay_us(delay);
+  uart_one_bit<delay>(0);
 
   for (int i = 0; i < 8; i++) {
     // Send 8 bits of data
     bool value = ch & 0x01;
     ch >>= 1;
-    send_bit(value);
-    _delay_us(delay);
+    uart_one_bit<delay>(value);
   }
 
   // Stop bit
-  send_bit(1);
-  _delay_us(delay);
+  uart_one_bit<delay>(1);
+}
+
+void softuart_putchar(char ch) {
+  constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 2) * 12);
+  generic_uart<delay>(ch);
 }
 
 void softuart_putchar_2(char ch) {
- //constexpr uint16_t delay = (1e6 / 115200);
- constexpr uint16_t delay = (((1e6 / 115200) * 2) * 12);
-  // Start bit
-  send_bit(0);
-  _delay_us(delay);
-
-  for (int i = 0; i < 8; i++) {
-    // Send 8 bits of data
-    bool value = ch & 0x01;
-    ch >>= 1;
-    send_bit(value);
-    _delay_us(delay);
-  }
-
-  // Stop bit
-  send_bit(1);
-  _delay_us(delay);
+  constexpr uint16_t delay = (((1e6 / 115200) * 2) * 12);
+  generic_uart<delay>(ch);
 }
-
 
 /////////////////////////////////////////////////////////////
 
@@ -220,7 +220,6 @@ uint32_t send_1byte(uint8_t key) {
     softuart_putchar(0X00);
     DELAY::ms<200>();
   }
-
 
   softuart_putchar(0xB0);
   DELAY::ms<900>();
@@ -235,7 +234,7 @@ uint32_t send_1byte(uint8_t key) {
   // send header
   const uint8_t header[] = {0xf5, 0xdf, 0xff, 0x00, 0x07};
   for (uint8_t el : header) {
-    //softuart_putchar(el);
+    // softuart_putchar(el);
     softuart_putchar_2(el);
   }
 
@@ -250,7 +249,7 @@ uint32_t send_1byte(uint8_t key) {
   softuart_putchar(zero);
   softuart_putchar(zero);
   softuart_putchar(zero);*/
-  
+
   softuart_putchar_2(key);
   softuart_putchar_2(zero);
   softuart_putchar_2(zero);
@@ -260,9 +259,9 @@ uint32_t send_1byte(uint8_t key) {
   softuart_putchar_2(zero);
 
   // send query
-  //softuart_putchar(0x70);
-  //DELAY::ms<2000>();
-  //softuart_putchar_2(0x75);
+  // softuart_putchar(0x70);
+  // DELAY::ms<2000>();
+  // softuart_putchar_2(0x75);
   softuart_putchar_2(0x70);
 
   // Start interrupt on falling edge
@@ -271,19 +270,17 @@ uint32_t send_1byte(uint8_t key) {
   // Delay for max timeout (4ms)
   DELAY::ms<4>();
 
- DELAY::ms<2000>();
+  DELAY::ms<2000>();
   softuart_putchar_2(0x75);
   softuart_putchar_2(0x70);
-  
-  return INT::noOfTicks;
 
-  
+  return INT::noOfTicks;
 }
 
 void send_256_bytes() {
   uint32_t max_value = 0;
   uint16_t max_digit = 0;
-  for (int k =0; k <= 255 ; k++) {
+  for (int k = 0; k <= 255; k++) {
 
     // Normal working
     DELAY::ms<700>();
@@ -304,11 +301,10 @@ void send_256_bytes() {
     VDD::on();
     DELAY::ms<1500>();
     RST::on();
-    
+
     // Delay to first digit
     DELAY::ms<1000>();
 
-    
     /*MODE::program();
     DELAY::ms<400>();
     VDD::off();
@@ -329,7 +325,7 @@ void send_256_bytes() {
     Serial.print(k);
     Serial.print(" required time: ");
 
-    double ms_time = ((double)required_time) / ((double)(F_CPU/1000));
+    double ms_time = ((double)required_time) / ((double)(F_CPU / 1000));
     Serial.print(ms_time);
     Serial.print(" ms  ");
     Serial.println(required_time);
@@ -342,7 +338,6 @@ void send_256_bytes() {
   Serial.print("Max digit: ");
   Serial.println(max_digit);
 }
-
 
 ////////////////////////////////////////////////////////////////////
 /////////////////////////// ARDUINO ////////////////////////////////
@@ -359,6 +354,8 @@ void setup() {
   pinMode(HW::RX_1, INPUT_PULLUP);
   pinMode(HW::TX_1, OUTPUT);
   digitalWrite(HW::TX_1, HIGH);
+  pinMode(HW::UART_CLK, OUTPUT);
+  digitalWrite(HW::UART_CLK, HIGH);
 
   start_PWM();
   sei();
@@ -383,7 +380,6 @@ void loop() {
   while (1) {
     send_256_bytes();
 
-    Serial.println("***********************************************"); 
+    Serial.println("***********************************************");
   }
-
 }
