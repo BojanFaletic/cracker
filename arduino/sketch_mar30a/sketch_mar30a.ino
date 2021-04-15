@@ -283,7 +283,7 @@ uint32_t send_1byte(uint8_t key) {
 void send_256_bytes() {
   uint32_t max_value = 0;
   uint16_t max_digit = 0;
-  for (int k =0; k <255 ; k++) {
+  for (int k =0; k <= 255 ; k++) {
 
     // Normal working
     DELAY::ms<700>();
