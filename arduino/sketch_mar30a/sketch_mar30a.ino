@@ -238,18 +238,6 @@ uint32_t send_1byte(uint8_t key) {
     softuart_putchar_2(el);
   }
 
-  // send key
-
-  // TEST 123
-
-  /*softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);
-  softuart_putchar(zero);*/
-
   softuart_putchar_2(key);
   softuart_putchar_2(zero);
   softuart_putchar_2(zero);
@@ -258,19 +246,13 @@ uint32_t send_1byte(uint8_t key) {
   softuart_putchar_2(zero);
   softuart_putchar_2(zero);
 
-  // send query
-  // softuart_putchar(0x70);
-  // DELAY::ms<2000>();
-  // softuart_putchar_2(0x75);
   softuart_putchar_2(0x70);
 
   // Start interrupt on falling edge
   INT::start();
 
-  // Delay for max timeout (4ms)
-  DELAY::ms<4>();
-
   DELAY::ms<2000>();
+
   softuart_putchar_2(0x75);
   softuart_putchar_2(0x70);
 
@@ -304,20 +286,6 @@ void send_256_bytes() {
 
     // Delay to first digit
     DELAY::ms<1000>();
-
-    /*MODE::program();
-    DELAY::ms<400>();
-    VDD::off();
-    DELAY::ms<500>();
-    RST::off();
-    DELAY::ms<700>();
-    VDD::on();
-    DELAY::ms<200>();
-    RST::on();
-
-    DELAY::ms<700>();
-    // DELAY::us<330>();
-    // DELAY::ns<350>();*/
 
     uint32_t required_time = send_1byte(k);
 
