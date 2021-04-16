@@ -150,12 +150,14 @@ void start_PWM() {
   // Set counter value to 0
   TCNT2 = 0x00;
   // Count to value
-  OCR2A = 11;
+  //OCR2A = 11;
+  OCR2A = 0;
 
   // Toggle on compare match (CTC mode)
   TCCR2A = 0b01 << 6 | 0b10 << 0;
   // Output to pin, 8 prescaller (1 MHZ)
   TCCR2B = 0b1 << 0;
+  //TCCR2B = 0b0 << 1;
 }
 
 void stop_PWM() {
@@ -202,12 +204,14 @@ template <uint16_t delay> void generic_uart(char ch) {
 }
 
 void softuart_putchar(char ch) {
-  constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 2) * 12);
+  //constexpr uint16_t delay = (((1e6 / UART::PC_BAUD) * 2) * 12);
+  constexpr uint16_t delay = ((1e6 / UART::PC_BAUD)*2);
   generic_uart<delay>(ch);
 }
 
 void softuart_putchar_2(char ch) {
-  constexpr uint16_t delay = (((1e6 / 115200) * 2) * 12);
+  //constexpr uint16_t delay = (((1e6 / 115200) * 2) * 12);
+  constexpr uint16_t delay = ((1e6 / 115200)*2);
   generic_uart<delay>(ch);
 }
 
@@ -263,6 +267,7 @@ void send_256_bytes() {
   uint32_t max_value = 0;
   uint16_t max_digit = 0;
   for (int k = 0; k <= 255; k++) {
+  //for (int k = 2; k >= 0; k--) {
 
     // Normal working
     DELAY::ms<700>();
