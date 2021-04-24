@@ -1,0 +1,26 @@
+/*
+ * cracker.h
+ *
+ *  Created on: Apr 24, 2021
+ *      Author: matic
+ */
+
+#ifndef INC_CRACKER_H_
+#define INC_CRACKER_H_
+
+#define TX_TIMEOUT 100
+#define RX_TIMEOUT 500
+
+#define RX_TX_OK 0 //transmit_recieve_byte()  finished successfully.
+
+#define BAUDRATE_CHANGE_OK 0 //set_baudrate() finished successfully.
+
+#define CON_INIT_OK 0 // init_target_connection() finished successfully.
+#define TRANSMIT_ERR 1 // Error during UART transmit.
+#define NO_RESPONSE 2 // No response from target device.
+#define INCORRECT_TARGET_RESPONSE 3 // Incorrect response from target device.
+#define INCORRECT_BAUDRATE 4 // Incorrect baud rated selected for communication.
+#define HW_BAUDRATE_CHANGE_ERR 5 // Hardware error while switching STM32 baud rate.
+
+
+#endif /* INC_CRACKER_H_ */

@@ -1,0 +1,10 @@
+09:11:41 **** Incremental Build of configuration Debug for project cracker ****
+make -j16 all 
+arm-none-eabi-size   cracker.elf 
+   text	   data	    bss	    dec	    hex	filename
+  31088	    492	   8076	  39656	   9ae8	cracker.elf
+Finished building: default.size.stdout
+ 
+
+09:11:42 Build Finished. 0 errors, 0 warnings. (took 225ms)
+

@@ -1,0 +1,23 @@
+//org.eclipse.ui.commands/state/com.st.stm32cube.ide.mcu.buildanalyzer.showstate/org.eclipse.ui.commands.radioState=human
+//org.eclipse.ui.commands/state/org.eclipse.ui.navigator.resources.nested.changeProjectPresentation/org.eclipse.ui.commands.radioState=false
+ACTIVE_HYPERLINK_COLOR=138,201,242
+CONFLICTING_COLOR=240,15,66
+CONTENT_ASSIST_BACKGROUND_COLOR=52,57,61
+CONTENT_ASSIST_FOREGROUND_COLOR=238,238,238
+ERROR_COLOR=247,68,117
+HYPERLINK_COLOR=111,197,238
+INCOMING_COLOR=31,179,235
+OUTGOING_COLOR=238,238,238
+RESOLVED_COLOR=108,210,17
+UIActivities.org.eclipse.cdt.debug.dsfgdbActivity=true
+eclipse.preferences.version=1
+org.eclipse.jface.REVISION_NEWEST_COLOR=75,44,3
+org.eclipse.jface.REVISION_OLDEST_COLOR=154,113,61
+org.eclipse.search.ui.match.highlight=206,92,0
+org.eclipse.ui.commands=<?xml version\="1.0" encoding\="UTF-8"?>\n<org.eclipse.ui.commands>\n<activeKeyConfiguration keyConfigurationId\="org.eclipse.cdt.ui.visualstudio"/>\n<keyBinding contextId\="org.eclipse.ui.contexts.window" keyConfigurationId\="org.eclipse.ui.defaultAcceleratorConfiguration" keySequence\="CTRL+F11"/>\n<keyBinding contextId\="org.eclipse.cdt.debug.ui.debugging" keyConfigurationId\="org.eclipse.ui.defaultAcceleratorConfiguration" keySequence\="SHIFT+F6"/>\n<keyBinding contextId\="org.eclipse.cdt.debug.ui.debugging" keyConfigurationId\="org.eclipse.ui.defaultAcceleratorConfiguration" keySequence\="SHIFT+F6"/>\n</org.eclipse.ui.commands>
+org.eclipse.ui.editors.rangeIndicatorColor=27,118,153
+org.eclipse.ui.workbench.HOVER_BACKGROUND=52,57,61
+org.eclipse.ui.workbench.HOVER_FOREGROUND=238,238,238
+org.eclipse.ui.workbench.INFORMATION_BACKGROUND=81,86,88
+org.eclipse.ui.workbench.INFORMATION_FOREGROUND=238,238,238
+overriddenByCSS=,ACTIVE_HYPERLINK_COLOR,CONFLICTING_COLOR,CONTENT_ASSIST_BACKGROUND_COLOR,CONTENT_ASSIST_FOREGROUND_COLOR,org.eclipse.ui.workbench.INFORMATION_BACKGROUND,org.eclipse.ui.workbench.INFORMATION_FOREGROUND,org.eclipse.ui.workbench.HOVER_BACKGROUND,org.eclipse.ui.workbench.HOVER_FOREGROUND,ERROR_COLOR,HYPERLINK_COLOR,INCOMING_COLOR,OUTGOING_COLOR,RESOLVED_COLOR,org.eclipse.search.ui.match.highlight,org.eclipse.ui.editors.rangeIndicatorColor,org.eclipse.jface.REVISION_NEWEST_COLOR,org.eclipse.jface.REVISION_OLDEST_COLOR,

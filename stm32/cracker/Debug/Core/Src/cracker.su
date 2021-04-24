@@ -1,0 +1,3 @@
+cracker.c:3:10:transmit_recieve_byte	24	static
+cracker.c:22:10:init_target_connection	32	static
+cracker.c:57:10:set_baudrate	24	static

@@ -1,0 +1,23 @@
+/*
+ * cracker.h
+ *
+ *  Created on: Apr 24, 2021
+ *      Author: matic
+ */
+
+#ifndef INC_CRACKER_H_
+#define INC_CRACKER_H_
+
+#define TX_TIMEOUT 100
+#define RX_TIMEOUT 500
+
+#define RX_TX_OK 0
+
+#define CON_INIT_OK 0
+#define TRANSMIT_ERR 1
+#define NO_RESPONSE 2
+#define INCORRECT_TARGET_RESPONSE 3
+#define INCORRECT_BAUDRATE 4
+
+
+#endif /* INC_CRACKER_H_ */
