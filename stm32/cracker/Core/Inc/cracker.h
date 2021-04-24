@@ -25,7 +25,7 @@
 #define BAURATE_HANDSHAKE_FAILED 4 //Baud rate handshake failed
 #define INCORRECT_BAUDRATE 5 // Incorrect baud rated selected for communication.
 #define HW_BAUDRATE_CHANGE_ERR 6 // Hardware error while switching STM32 baud rate.
-#define ERROR_AFTER_BAUDRATE_SWITCH 7 // Communication error after baud rate switch.
+#define ERROR_AFTER_BAUDRATE_SWITCH 7 // Communication error after baud rate was switched.
 
 uint32_t set_baudrate(UART_HandleTypeDef *huart, uint32_t baudrate);
 uint32_t init_target_connection(UART_HandleTypeDef *huart);

@@ -1,7 +1,9 @@
 #include "cracker.h"
 
+/*Try not to write blocking functions.*/
+
 uint32_t transmit_recieve_byte(UART_HandleTypeDef *huart, uint8_t transmitedByte, uint8_t expectedRxByte){
-	/* Transmits a byte and checks if the response matches the desired one.*/
+	/* Transmits a uart byte and checks if the response matches the desired one.*/
 	uint8_t transmitBuffer[4];
 	uint8_t recieveBuffer[4];
 
@@ -20,8 +22,7 @@ uint32_t transmit_recieve_byte(UART_HandleTypeDef *huart, uint8_t transmitedByte
 }
 
 uint32_t init_target_connection(UART_HandleTypeDef *huart){
-	/* This functions initializes the uart connection to target device.
-	 * Returns 0 if communication is successfully established.*/
+	/* This functions initializes the uart connection to target device. */
 
 	uint8_t transmitBuffer[4];
 	uint8_t recieveBuffer[4];
@@ -54,8 +55,8 @@ uint32_t init_target_connection(UART_HandleTypeDef *huart){
 	return CON_INIT_OK;
 }
 
-uint32_t set_baudrate(UART_HandleTypeDef *huart, uint32_t baudrate)
-{
+uint32_t set_baudrate(UART_HandleTypeDef *huart, uint32_t baudrate){
+	/*Set the desired baud rate.*/
 	uint32_t tx_rx_status;
 	// Initiate the baud rate change
 	tx_rx_status = transmit_recieve_byte(huart, 0xB0, 0xB0);

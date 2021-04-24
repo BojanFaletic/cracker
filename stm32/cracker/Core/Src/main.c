@@ -137,14 +137,20 @@ int main(void)
 	//Wait for start button press (key0 on board).
 	while(HAL_GPIO_ReadPin(start_button_GPIO_Port, start_button_Pin));
 	uint32_t returncode;
-	returncode = init_target_connection(&huart1);
-	if(returncode != CON_INIT_OK)
+
+	// Initiate the target communication
+	if(init_target_connection(&huart1) != CON_INIT_OK)
 	{
 		char errorcodeNumberStr[2];
 		itoa(returncode, errorcodeNumberStr, 10);
 		uint8_t error_text[] = "Error while initializing target communication. Error number is: ";
 		usb_uart_print(error_text, sizeof(error_text));
 		usb_uart_print((uint8_t *)errorcodeNumberStr, sizeof(errorcodeNumberStr));
+
+	}
+
+	if(set_baudrate(&huar1, 9600) != BAUDRATE_CHANGE_OK)
+	{
 
 	}
 
