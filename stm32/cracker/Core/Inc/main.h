@@ -60,6 +60,16 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define start_button_Pin GPIO_PIN_4
 #define start_button_GPIO_Port GPIOE
+#define target_reset_Pin GPIO_PIN_5
+#define target_reset_GPIO_Port GPIOE
+#define target_mode_Pin GPIO_PIN_6
+#define target_mode_GPIO_Port GPIOE
+#define tx_trigger_Pin GPIO_PIN_7
+#define tx_trigger_GPIO_Port GPIOC
+#define tx_trigger_EXTI_IRQn EXTI9_5_IRQn
+#define rx_trigger_Pin GPIO_PIN_8
+#define rx_trigger_GPIO_Port GPIOC
+#define rx_trigger_EXTI_IRQn EXTI9_5_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

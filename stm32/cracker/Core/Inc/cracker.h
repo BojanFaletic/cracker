@@ -30,6 +30,9 @@
 uint32_t set_baudrate(UART_HandleTypeDef *huart, uint32_t baudrate);
 uint32_t init_target_connection(UART_HandleTypeDef *huart);
 uint32_t transmit_recieve_byte(UART_HandleTypeDef *huart, uint8_t transmitedByte, uint8_t expectedRxByte);
+void target_reset(GPIO_TypeDef *port, uint16_t reset_pin, uint16_t mode_pin);
+void send_one_key_byte(uint8_t byte, uint8_t byte_pos,  UART_HandleTypeDef *huart, TIM_HandleTypeDef *htim);
+uint32_t read_and_reset_timer(TIM_HandleTypeDef *htim);
 
 
 #endif /* INC_CRACKER_H_ */

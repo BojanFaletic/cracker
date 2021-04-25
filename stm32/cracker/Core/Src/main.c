@@ -67,10 +67,11 @@ static void MX_USART1_UART_Init(void);
 /*Please please please don't use print functions for debugging. Use print functions only for
  *status update, that will be used once the program will be in a state to run standalone.*/
 
-void usb_uart_print(uint8_t text[], uint32_t test_size){
+void usb_uart_print(uint8_t text[], uint32_t text_size){
 	/*7 bit ascii is retarded. - Terry Davis.*/
-	// Don't do sizeof dynamic arrays. Learned that the hard way.
-    CDC_Transmit_FS((uint8_t*)text, test_size);
+	// Don't do sizeof dynamic arrays as function arguments. Learned that the hard way.
+    CDC_Transmit_FS((uint8_t*)text, text_size);
+    HAL_Delay(100);
 }
 
 /*Strings suck in C.*/
@@ -88,6 +89,43 @@ char *join(const char* s1, const char* s2)
     return result;
 }
 
+
+uint32_t send_1byte(uint8_t byte, uint8_t byte_pos)
+{
+
+	uint32_t timer_ticks;
+	uint32_t returncode;
+	// Reset target first
+	target_reset(GPIOE, target_reset_Pin, target_mode_Pin);
+
+	// Initiate the target communication
+	returncode = init_target_connection(&huart1);
+	if(returncode != CON_INIT_OK)
+	{
+		char errorcodeNumberStr[2];
+		itoa(returncode, errorcodeNumberStr, 10);
+		uint8_t init_error_text[] = "Error while initializing target communication. Error number is: ";
+		usb_uart_print(init_error_text, sizeof(init_error_text));
+		usb_uart_print((uint8_t *)errorcodeNumberStr, sizeof(errorcodeNumberStr));
+		return 0;
+	}
+
+	returncode = set_baudrate(&huart1, 9600);
+	if(returncode != BAUDRATE_CHANGE_OK)
+	{
+		char errorcodeNumberStr[2];
+		itoa(returncode, errorcodeNumberStr, 10);
+		uint8_t baudrate_error_text[] = "Error while switching baud rate. Error number is: ";
+		usb_uart_print(baudrate_error_text, sizeof(baudrate_error_text));
+		usb_uart_print((uint8_t *)errorcodeNumberStr, sizeof(errorcodeNumberStr));
+		return 0;
+	}
+
+	send_one_key_byte(byte, byte_pos, &huart1, &htim2);
+	timer_ticks = read_and_reset_timer(&htim2);
+
+	return timer_ticks;
+}
 
 
 /* USER CODE END 0 */
@@ -132,27 +170,44 @@ int main(void)
   while (1)
   {
 	HAL_Delay(1000);
-	uint8_t start_text[] = "Press key0 to start cracker.\n";
-	usb_uart_print(start_text, sizeof(start_text));
+	uint8_t initial_text[] = "Press key0 to start cracker.\n";
+	usb_uart_print(initial_text, sizeof(initial_text));
 	//Wait for start button press (key0 on board).
 	while(HAL_GPIO_ReadPin(start_button_GPIO_Port, start_button_Pin));
-	uint32_t returncode;
 
-	// Initiate the target communication
-	if(init_target_connection(&huart1) != CON_INIT_OK)
+	uint8_t start_text[] = "Cracker started.\n";
+	usb_uart_print(start_text, sizeof(start_text));
+	HAL_Delay(500);
+
+	int i;
+	for(i = 0; i < 256; i++)
 	{
-		char errorcodeNumberStr[2];
-		itoa(returncode, errorcodeNumberStr, 10);
-		uint8_t error_text[] = "Error while initializing target communication. Error number is: ";
-		usb_uart_print(error_text, sizeof(error_text));
-		usb_uart_print((uint8_t *)errorcodeNumberStr, sizeof(errorcodeNumberStr));
+		uint32_t timer_ticks;
+		timer_ticks = send_1byte(i, 0);
+
+
+
+		uint8_t time_text[] = "Ticks for Byte  ";
+		usb_uart_print(time_text, sizeof(time_text));
+
+		char byte_no[3];
+		itoa(i, byte_no, 10);
+		usb_uart_print((uint8_t *)byte_no, sizeof(byte_no));
+
+		uint8_t time_text2[] = " are: ";
+		usb_uart_print(time_text2, sizeof(time_text2));
+
+		char timer_ticks_str[10];
+		itoa(timer_ticks, timer_ticks_str, 10);
+		usb_uart_print((uint8_t *)timer_ticks_str, sizeof(timer_ticks_str));
+
+		uint8_t time_text3[] = "\n";
+		usb_uart_print(time_text3, sizeof(time_text3));
 
 	}
 
-	if(set_baudrate(&huar1, 9600) != BAUDRATE_CHANGE_OK)
-	{
 
-	}
+
 
 
 
@@ -296,13 +351,44 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(target_reset_GPIO_Port, target_reset_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(target_mode_GPIO_Port, target_mode_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : start_button_Pin */
   GPIO_InitStruct.Pin = start_button_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(start_button_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : target_reset_Pin */
+  GPIO_InitStruct.Pin = target_reset_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(target_reset_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : target_mode_Pin */
+  GPIO_InitStruct.Pin = target_mode_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(target_mode_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : tx_trigger_Pin rx_trigger_Pin */
+  GPIO_InitStruct.Pin = tx_trigger_Pin|rx_trigger_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 

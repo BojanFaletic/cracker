@@ -52,7 +52,7 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+extern TIM_HandleTypeDef htim2;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -198,6 +198,37 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f4xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles EXTI line[9:5] interrupts.
+  */
+void EXTI9_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+  if(__HAL_GPIO_EXTI_GET_FLAG(GPIO_PIN_7)){
+	  // Timer must be stopped and reset to start again.
+	  if((htim2.Instance->CCR1 == 0x00) & (htim2.Instance->CNT == 0x00))
+	  {
+		  HAL_TIM_Base_Start(&htim2);
+	  }
+
+  }
+  else
+  {
+	  // Don't do anything if timer is stopped.
+	  if(htim2.Instance->CCR1 != 0x00)
+	  {
+		  HAL_TIM_Base_Stop(&htim2);
+	  }
+
+  }
+  /* USER CODE END EXTI9_5_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_7);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+  /* USER CODE END EXTI9_5_IRQn 1 */
+}
 
 /**
   * @brief This function handles USB On The Go FS global interrupt.
