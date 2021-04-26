@@ -142,9 +142,9 @@ uint32_t set_baudrate(UART_HandleTypeDef *huart, uint32_t baudrate){
 void target_reset(GPIO_TypeDef *port, uint16_t reset_pin, uint16_t mode_pin){
 	/*Reset the target and pull mode pin to low.*/
 	HAL_GPIO_WritePin(port, mode_pin, GPIO_PIN_RESET);
-	HAL_Delay(500);
+//	HAL_Delay(500);
 	HAL_GPIO_WritePin(port, reset_pin, GPIO_PIN_RESET);
-	HAL_Delay(500);
+	HAL_Delay(100);
 	HAL_GPIO_WritePin(port, reset_pin, GPIO_PIN_SET);
 	HAL_Delay(500);
 }

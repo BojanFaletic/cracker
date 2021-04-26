@@ -110,7 +110,7 @@ uint32_t send_1byte(uint8_t byte, uint8_t byte_pos)
 		return 0;
 	}
 
-	returncode = set_baudrate(&huart1, 9600);
+	returncode = set_baudrate(&huart1, 115200);
 	if(returncode != BAUDRATE_CHANGE_OK)
 	{
 		char errorcodeNumberStr[2];
@@ -179,13 +179,22 @@ int main(void)
 	usb_uart_print(start_text, sizeof(start_text));
 	HAL_Delay(500);
 
+	uint32_t longest_tick = 0;
+	uint32_t longest_tick_byte = 0;
+
 	int i;
 	for(i = 0; i < 256; i++)
 	{
+
+
 		uint32_t timer_ticks;
 		timer_ticks = send_1byte(i, 0);
 
-
+		if(timer_ticks > longest_tick)
+		{
+			longest_tick = timer_ticks;
+			longest_tick_byte = i;
+		}
 
 		uint8_t time_text[] = "Ticks for Byte  ";
 		usb_uart_print(time_text, sizeof(time_text));
@@ -205,6 +214,16 @@ int main(void)
 		usb_uart_print(time_text3, sizeof(time_text3));
 
 	}
+
+	uint8_t time_text4[] = "Longest tick recorded at byte no: ";
+	usb_uart_print(time_text4, sizeof(time_text4));
+
+	char longest_byte_no[3];
+	itoa(longest_tick_byte, longest_byte_no, 10);
+	usb_uart_print((uint8_t *)longest_byte_no, sizeof(longest_byte_no));
+
+	uint8_t time_text5[] = "\n";
+	usb_uart_print(time_text5, sizeof(time_text5));
 
 
 
