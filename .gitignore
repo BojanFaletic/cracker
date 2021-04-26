@@ -9,3 +9,8 @@
 !avr/*.cpp
 !avr/*.cmd
 !avr/Makefile
+!stm32/*.c
+!stm32/*.h
+!stm32/*.ld
+!stm32/*.elf
+
