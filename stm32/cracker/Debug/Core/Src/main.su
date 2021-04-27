@@ -1,9 +1,0 @@
-main.c:70:6:usb_uart_print	16	static
-main.c:79:7:join	32	static
-main.c:93:10:send_1byte	112	static
-main.c:137:5:main	176	static
-main.c:244:6:SystemClock_Config	88	static
-main.c:288:13:MX_TIM2_Init	32	static
-main.c:333:13:MX_USART1_UART_Init	8	static
-main.c:366:13:MX_GPIO_Init	48	static
-main.c:422:6:Error_Handler	4	static,ignoring_inline_asm

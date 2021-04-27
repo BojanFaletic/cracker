@@ -1,16 +1,23 @@
-# Ignore all files except select fiew
-*
-!cracker
-!doc
-!arduino
+# Accepted file types for commit.
+*.*
+!*.gitignore
+!*.c
+!*.h
+!*.cpp
+!*.hpp
+!*.s
+!*.ld
+!*.hex
+!*.elf
+!*.bin
 !*.py
+!*.pyc
+!*.md
 !*.txt
-!avr/header
-!avr/*.cpp
-!avr/*.cmd
-!avr/Makefile
-!stm32/*.c
-!stm32/*.h
-!stm32/*.ld
-!stm32/*.elf
-
+!*.ino
+!*Makefile
+!*.cmd
+!*.pdf
+!*.jpg
+!*.png
+!*.ioc

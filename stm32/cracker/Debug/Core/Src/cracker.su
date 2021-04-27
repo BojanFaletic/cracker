@@ -1,7 +1,0 @@
-cracker.c:5:10:read_and_reset_timer	24	static
-cracker.c:23:6:clean_rx_buffer	24	static
-cracker.c:29:10:transmit_recieve_byte	24	static
-cracker.c:53:10:init_target_connection	32	static
-cracker.c:88:10:set_baudrate	24	static
-cracker.c:142:6:target_reset	16	static
-cracker.c:152:6:send_one_key_byte	48	static
