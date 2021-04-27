@@ -13,7 +13,7 @@ Perhaps the USB port could be used by putting the device in USB DFU mode, but I 
 To communicate with your PC, STM32F407 uses one USB port as a virtual COM port. 
 
 On the STM32F407VET black board this is the mini USB port at the front.
-![USB connection](stm32_usb.png)
+![USB connection](../../doc/img/stm32_usb.png)
 
 ## Target connections
 
@@ -22,7 +22,8 @@ How to connect STM32F407VET black board for cracking.
 ### UART target
 
 Target UART connection is done at the board UART header.
-![UART connection](doc/img/stm32_uart)
+
+![UART connection](../../doc/img/stm32_uart.png)
 
 ### Transfer triggers
 
