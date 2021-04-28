@@ -31,7 +31,6 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
-
 /* Variables */
 //#undef errno
 extern int errno;

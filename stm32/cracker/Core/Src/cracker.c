@@ -4,7 +4,7 @@
 
 uint32_t read_and_reset_timer(TIM_HandleTypeDef *htim)
 {
-	// Read timer only if it is stopped. If it isn't stopped stop and reset timer.
+	// Read timer only if it is stopped. If it isn't stopped, stop and reset timer.
 	if(htim->Instance->CCR1 != 0x00)
 	{
 		htim->Instance->CCR1 = 0;
@@ -18,6 +18,11 @@ uint32_t read_and_reset_timer(TIM_HandleTypeDef *htim)
 	//Reset the timer counter;
 	htim->Instance->CNT = 0x00000000;
 	return timer_count;
+}
+
+uint32_t did_timer_overflow(TIM_HandleTypeDef *htim){
+	#TODO
+	return 0;
 }
 
 void clean_rx_buffer(UART_HandleTypeDef *huart){

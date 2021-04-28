@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/stat.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,6 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,6 +52,7 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+uint8_t is_cdc_initialized = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,26 +70,26 @@ static void MX_USART1_UART_Init(void);
 /*Please please please don't use print functions for debugging. Use print functions only for
  *status update, that will be used once the program will be in a state to run standalone.*/
 
-void usb_uart_print(uint8_t text[], uint32_t text_size){
-	/*7 bit ascii is retarded. - Terry Davis.*/
-	// Don't do sizeof dynamic arrays as function arguments. Learned that the hard way.
-    CDC_Transmit_FS((uint8_t*)text, text_size);
-    HAL_Delay(100);
-}
-
-/*Strings suck in C.*/
-
-char *join(const char* s1, const char* s2)
+/* Retarget printf*/
+int _write(int fd, char * ptr, int len)
 {
-    char* result = malloc(strlen(s1) + strlen(s2) + 1);
+	if(is_cdc_initialized){
 
-    if (result)
-    {
-        strcpy(result, s1);
-        strcat(result, s2);
-    }
-
-    return result;
+		int no_of_retries = 0;
+		// I'm pretty sure that CDC_Transmit_FS() doesn't return USBD_OK, if no USB connection is established.
+		// To make this work under debug and to prevent blocking code, printf gives up after 9000 tries.
+		while(CDC_Transmit_FS((uint8_t *)ptr, len) != USBD_OK){
+			no_of_retries++;
+			if(no_of_retries > 9000){
+				// It's over 9000!
+				return 0;
+			}
+		}
+		return (len);
+	}
+	else{
+		return 0;
+	}
 }
 
 
@@ -102,28 +105,19 @@ uint32_t send_1byte(uint8_t byte, uint8_t byte_pos)
 	returncode = init_target_connection(&huart1);
 	if(returncode != CON_INIT_OK)
 	{
-		char errorcodeNumberStr[2];
-		itoa(returncode, errorcodeNumberStr, 10);
-		uint8_t init_error_text[] = "Error while initializing target communication. Error number is: ";
-		usb_uart_print(init_error_text, sizeof(init_error_text));
-		usb_uart_print((uint8_t *)errorcodeNumberStr, sizeof(errorcodeNumberStr));
+		printf("Initiating target communication failed with: %lu \n", returncode);
 		return 0;
 	}
 
 	returncode = set_baudrate(&huart1, 115200);
 	if(returncode != BAUDRATE_CHANGE_OK)
 	{
-		char errorcodeNumberStr[2];
-		itoa(returncode, errorcodeNumberStr, 10);
-		uint8_t baudrate_error_text[] = "Error while switching baud rate. Error number is: ";
-		usb_uart_print(baudrate_error_text, sizeof(baudrate_error_text));
-		usb_uart_print((uint8_t *)errorcodeNumberStr, sizeof(errorcodeNumberStr));
+		printf("Setting the baud rate failed with: %lu \n", returncode);
 		return 0;
 	}
 
 	send_one_key_byte(byte, byte_pos, &huart1, &htim2);
 	timer_ticks = read_and_reset_timer(&htim2);
-
 	return timer_ticks;
 }
 
@@ -137,7 +131,8 @@ uint32_t send_1byte(uint8_t byte, uint8_t byte_pos)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  /*This is so that we don't need new line for every printf.*/
+  setvbuf(stdout, NULL, _IONBF, 0);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -146,7 +141,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -162,7 +156,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-
+  is_cdc_initialized = 1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -170,60 +164,58 @@ int main(void)
   while (1)
   {
 	HAL_Delay(1000);
-	uint8_t initial_text[] = "Press key0 to start cracker.\n";
-	usb_uart_print(initial_text, sizeof(initial_text));
+	printf("Press key0 to start cracker.\n");
 	//Wait for start button press (key0 on board).
-	while(HAL_GPIO_ReadPin(start_button_GPIO_Port, start_button_Pin));
+	while(HAL_GPIO_ReadPin(GPIOE, k0_Pin));
 
-	uint8_t start_text[] = "Cracker started.\n";
-	usb_uart_print(start_text, sizeof(start_text));
+	printf("Cracker started.\n");
 	HAL_Delay(500);
 
-	uint32_t longest_tick = 0;
-	uint32_t longest_tick_byte = 0;
+	uint8_t byte_no = 0;
+
+	uint8_t detected_key[7];
 
 	int i;
-	for(i = 0; i < 256; i++)
-	{
+	for(byte_no = 0; byte_no < 7; byte_no++){
+		uint32_t longest_tick = 0;
+		uint32_t longest_tick_byte = 0;
 
+		for(i = 0; i < 256; i++){
+			uint32_t timer_ticks;
+			timer_ticks = send_1byte(i, 0);
 
-		uint32_t timer_ticks;
-		timer_ticks = send_1byte(i, 0);
+			if(!timer_ticks)
+			{
+				// No ticks detected handler
+				printf("Timer ticks were 0 which indicates an error. Press key0 to continue or key1 to cancel this run.\n");
+				while(HAL_GPIO_ReadPin(GPIOE, k0_Pin) == GPIO_PIN_SET)
+				{
+					if(HAL_GPIO_ReadPin(GPIOE, k1_Pin) == GPIO_PIN_RESET)
+					{
+						byte_no = 7;
+						i = 256;
+						break;
+					}
+				}
+			}
 
-		if(timer_ticks > longest_tick)
-		{
-			longest_tick = timer_ticks;
-			longest_tick_byte = i;
+			if(timer_ticks > longest_tick)
+			{
+				longest_tick = timer_ticks;
+				longest_tick_byte = i;
+			}
+
+			printf("Number of ticks for Byte %d at Key Byte %d was : %lu \n", i, byte_no + 1, timer_ticks);
 		}
-
-		uint8_t time_text[] = "Ticks for Byte  ";
-		usb_uart_print(time_text, sizeof(time_text));
-
-		char byte_no[3];
-		itoa(i, byte_no, 10);
-		usb_uart_print((uint8_t *)byte_no, sizeof(byte_no));
-
-		uint8_t time_text2[] = " are: ";
-		usb_uart_print(time_text2, sizeof(time_text2));
-
-		char timer_ticks_str[10];
-		itoa(timer_ticks, timer_ticks_str, 10);
-		usb_uart_print((uint8_t *)timer_ticks_str, sizeof(timer_ticks_str));
-
-		uint8_t time_text3[] = "\n";
-		usb_uart_print(time_text3, sizeof(time_text3));
-
+		detected_key[byte_no] = longest_tick_byte;
 	}
 
-	uint8_t time_text4[] = "Longest tick recorded at byte no: ";
-	usb_uart_print(time_text4, sizeof(time_text4));
-
-	char longest_byte_no[3];
-	itoa(longest_tick_byte, longest_byte_no, 10);
-	usb_uart_print((uint8_t *)longest_byte_no, sizeof(longest_byte_no));
-
-	uint8_t time_text5[] = "\n";
-	usb_uart_print(time_text5, sizeof(time_text5));
+	printf("\nDetected key was:");
+	for(i = 0; i < 7; i++)
+	{
+		printf(" 0x%x", detected_key[i]);
+	}
+	printf("\n\n");
 
 
 
@@ -379,11 +371,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(target_mode_GPIO_Port, target_mode_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : start_button_Pin */
-  GPIO_InitStruct.Pin = start_button_Pin;
+  /*Configure GPIO pins : k1_Pin k0_Pin */
+  GPIO_InitStruct.Pin = k1_Pin|k0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(start_button_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : target_reset_Pin */
   GPIO_InitStruct.Pin = target_reset_Pin;
