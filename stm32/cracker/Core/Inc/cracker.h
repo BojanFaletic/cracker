@@ -12,7 +12,9 @@
 
 #define GET_MIN_CLK_SPEED
 
-#define TARGET_CLOCK_KHZ 250
+#define TEST_TARGET_SPEED 9600
+
+#define TARGET_CLOCK_KHZ 4000
 #define MAX_TARGET_CLKSPEED_KHZ 4000
 
 #define TX_TIMEOUT 100 // Timeout for uart TX.

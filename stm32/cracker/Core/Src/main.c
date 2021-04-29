@@ -107,14 +107,14 @@ uint32_t send_1byte(uint8_t byte, uint8_t byte_pos)
 	returncode = init_target_connection(&huart1);
 	if(returncode != CON_INIT_OK)
 	{
-		printf("Initiating target communication failed with: %lu \n", returncode);
+		printf("Initiating target communication failed with error: %lu \n", returncode);
 		return 0;
 	}
 
-	returncode = set_baudrate(&huart1, 115200);
+	returncode = set_baudrate(&huart1, TEST_TARGET_SPEED);
 	if(returncode != BAUDRATE_CHANGE_OK)
 	{
-		printf("Setting the baud rate failed with: %lu \n", returncode);
+		printf("Setting the baud rate failed with error: %lu \n", returncode);
 		return 0;
 	}
 
@@ -129,17 +129,42 @@ void set_min_clock()
 	printf("Finding minimal clock speed");
 	uint32_t clock_speed_khz;
 	for(clock_speed_khz = 100; clock_speed_khz <= MAX_TARGET_CLKSPEED_KHZ; clock_speed_khz += 100){
-		uint32_t returncode;
+		uint32_t init_returncode;
+		uint32_t baudrate_returncode;
 		printf("Testing clock of: %lu KHz\n", clock_speed_khz);
 		set_target_clock_generator(&htim3, clock_speed_khz);
 		// Reset target first
 		target_reset(GPIOE, target_reset_Pin, target_mode_Pin);
 
 		// Initiate the target communication
-		returncode = init_target_connection(&huart1);
-		if(returncode == CON_INIT_OK){
-			printf("Clock speed %lu KHz is the lowest detected speed.\n", clock_speed_khz);
-			return;
+		init_returncode = init_target_connection(&huart1);
+		// Test baud rate switch.
+		baudrate_returncode = set_baudrate(&huart1, TEST_TARGET_SPEED);
+
+		if((init_returncode == CON_INIT_OK) && (baudrate_returncode == BAUDRATE_CHANGE_OK)){
+			printf("Clock speed %lu KHz seems fine. Testing clock stability.\n", clock_speed_khz);
+			//Test communication a few more times to make sure it runs reliably. This is to avoid any instabilities during testing.
+			int i;
+			uint8_t no_of_fails = 0;
+			for(i = 0; i < 10; i++)
+			{
+				target_reset(GPIOE, target_reset_Pin, target_mode_Pin);
+				// Initiate the target communication
+				init_returncode = init_target_connection(&huart1);
+				// Test baud rate switch.
+				baudrate_returncode = set_baudrate(&huart1, TEST_TARGET_SPEED);
+				if((init_returncode != CON_INIT_OK) && (baudrate_returncode != BAUDRATE_CHANGE_OK)){
+					no_of_fails++;
+					break;
+				}
+			}
+			if(no_of_fails == 0){
+				printf("Clock speed %lu KHz is the lowest detected speed.\n", clock_speed_khz);
+				return;
+			}
+			else{
+				printf("Clock speed %lu KHz was unstable.\n", clock_speed_khz);
+			}
 		}
 		else
 		{
@@ -187,6 +212,12 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   is_cdc_initialized = 1;
+  #ifdef GET_MIN_CLK_SPEED
+  set_min_clock();
+  #else
+  set_target_clock_generator(&htim3, TARGET_CLOCK_KHZ);
+  #endif
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -194,11 +225,7 @@ int main(void)
   while (1)
   {
 	HAL_Delay(1000);
-	#ifdef GET_MIN_CLK_SPEED
-	set_min_clock();
-	#else
-	set_target_clock_generator(&htim3, TARGET_CLOCK_KHZ);
-	#endif
+
 
 
 	printf("Press key0 to start cracker.\n");
