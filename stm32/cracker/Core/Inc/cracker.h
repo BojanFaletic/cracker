@@ -10,6 +10,7 @@
 
 #include "stm32f4xx_hal.h"
 
+#define TARGET_CLOCK_KHZ 250
 
 #define TX_TIMEOUT 100 // Timeout for uart TX.
 #define RX_TIMEOUT 500 //Timeout for uart RX.
@@ -33,6 +34,7 @@ uint32_t transmit_recieve_byte(UART_HandleTypeDef *huart, uint8_t transmitedByte
 void target_reset(GPIO_TypeDef *port, uint16_t reset_pin, uint16_t mode_pin);
 void send_one_key_byte(uint8_t byte, uint8_t byte_pos,  UART_HandleTypeDef *huart, TIM_HandleTypeDef *htim);
 uint32_t read_and_reset_timer(TIM_HandleTypeDef *htim);
+void set_target_clock_generator(TIM_HandleTypeDef *htim, uint32_t clock_in_KHz);
 
 
 #endif /* INC_CRACKER_H_ */

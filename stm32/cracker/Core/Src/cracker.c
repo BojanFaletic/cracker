@@ -20,10 +20,6 @@ uint32_t read_and_reset_timer(TIM_HandleTypeDef *htim)
 	return timer_count;
 }
 
-uint32_t did_timer_overflow(TIM_HandleTypeDef *htim){
-	#TODO
-	return 0;
-}
 
 void clean_rx_buffer(UART_HandleTypeDef *huart){
 	/*Cleans (reads) the entire RX buffer*/
@@ -179,5 +175,26 @@ void send_one_key_byte(uint8_t byte, uint8_t byte_pos,  UART_HandleTypeDef *huar
 	HAL_UART_Transmit(huart, key, sizeof(key), TX_TIMEOUT);
 	HAL_Delay(100);
 
+}
+
+void set_target_clock_generator(TIM_HandleTypeDef *htim, uint32_t clock_in_KHz){
+	float frequency_us =  ((float)clock_in_KHz / 1000);
+	float timer_period_us = (1 / frequency_us);
+
+	// Get the input period from system clock and timer prescaler.
+	float timer_prescaler = (htim->Init.Prescaler + 1);
+	float sys_clk_mhz = (HAL_RCC_GetSysClockFreq() / 1000000) / 2;
+	float input_period_us = (float)(1/(sys_clk_mhz / timer_prescaler));
+
+	htim->Init.Period = (uint32_t)(timer_period_us / input_period_us);
+	HAL_TIM_PWM_Init(htim);
+
+    TIM_OC_InitTypeDef sConfigOC = {0};
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = (uint32_t)((timer_period_us / input_period_us) / 2);
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	HAL_TIM_PWM_ConfigChannel(htim, &sConfigOC, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);
 }
 
