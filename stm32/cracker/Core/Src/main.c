@@ -124,6 +124,33 @@ uint32_t send_1byte(uint8_t byte, uint8_t byte_pos)
 }
 
 
+void set_min_clock()
+{
+	printf("Finding minimal clock speed");
+	uint32_t clock_speed_khz;
+	for(clock_speed_khz = 100; clock_speed_khz <= MAX_TARGET_CLKSPEED_KHZ; clock_speed_khz += 100){
+		uint32_t returncode;
+		printf("Testing clock of: %lu KHz\n", clock_speed_khz);
+		set_target_clock_generator(&htim3, clock_speed_khz);
+		// Reset target first
+		target_reset(GPIOE, target_reset_Pin, target_mode_Pin);
+
+		// Initiate the target communication
+		returncode = init_target_connection(&huart1);
+		if(returncode == CON_INIT_OK){
+			printf("Clock speed %lu KHz is the lowest detected speed.\n", clock_speed_khz);
+			return;
+		}
+		else
+		{
+			printf("Clock speed to low.\n");
+		}
+	}
+	printf("Target didn't respond at any of the selected speeds. Defaulting to %u KHz. Please check the connection.\n", TARGET_CLOCK_KHZ);
+	set_target_clock_generator(&htim3, TARGET_CLOCK_KHZ);
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -167,8 +194,12 @@ int main(void)
   while (1)
   {
 	HAL_Delay(1000);
-
+	#ifdef GET_MIN_CLK_SPEED
+	set_min_clock();
+	#else
 	set_target_clock_generator(&htim3, TARGET_CLOCK_KHZ);
+	#endif
+
 
 	printf("Press key0 to start cracker.\n");
 	//Wait for start button press (key0 on board).

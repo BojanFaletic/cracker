@@ -10,10 +10,13 @@
 
 #include "stm32f4xx_hal.h"
 
+#define GET_MIN_CLK_SPEED
+
 #define TARGET_CLOCK_KHZ 250
+#define MAX_TARGET_CLKSPEED_KHZ 4000
 
 #define TX_TIMEOUT 100 // Timeout for uart TX.
-#define RX_TIMEOUT 500 //Timeout for uart RX.
+#define RX_TIMEOUT 1000 //Timeout for uart RX.
 
 #define RX_TX_OK 0 //transmit_recieve_byte()  finished successfully.
 
