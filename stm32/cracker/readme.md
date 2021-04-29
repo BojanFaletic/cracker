@@ -49,6 +49,13 @@ Target MODE pin is needed to put the target into programming mode.
 To connect MODE on the STM32F407VET black board:
 	PE6->target MODE
 	
+### Target clock pin
+
+STM32F407 device can generate the clock for the target device. It also supports lowest clock detection, where the STM32F407 detects the lowest stable target clock.
+
+To connect MODE on the STM32F407VET black board:
+	PA6->target XIN pin
+	
 ### Start key
 
 To initiate the cracking, key0 on the STM32F407VET black board or pull low PE4 pin. 
